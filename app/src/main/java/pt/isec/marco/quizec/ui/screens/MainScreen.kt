@@ -43,8 +43,8 @@ import pt.isec.marco.quizec.ui.screens.criador.HistoricoQuestionarioScreen
 import pt.isec.marco.quizec.ui.screens.criador.SelecionarPerguntasScreen
 import pt.isec.marco.quizec.ui.screens.criador.TipoPerguntaScreen
 import pt.isec.marco.quizec.ui.screens.criador.VerQuestionarioScreen
+import pt.isec.marco.quizec.ui.screens.utilizador.EntrarQuestionarioScreen
 import pt.isec.marco.quizec.ui.screens.utilizador.HistoricoQuestionarioRespondidosScreen
-import pt.isec.marco.quizec.ui.screens.utilizador.QuestionarioScreen
 import pt.isec.marco.quizec.ui.screens.utilizador.ResponderQuestionarioScreen
 import pt.isec.marco.quizec.ui.screens.utilizador.UtilizadorMenuScreen
 import pt.isec.marco.quizec.ui.theme.FirebaseTheme
@@ -257,13 +257,13 @@ fun MainScreen(
                         )
                     }
                 }
-                composable(route = "questionario") {
+                composable(route = "entrar-questionario") {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(Color(108, 147, 201, 255))
                     ) {
-                        QuestionarioScreen(
+                        EntrarQuestionarioScreen(
                             viewModel = viewModel,
                             navController = navController,
                             codigoPartilha = codigoPartilha

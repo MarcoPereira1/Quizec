@@ -55,8 +55,8 @@ fun UtilizadorMenuScreen(
             }
             Button(
                 onClick = {
-                    navController.navigate("questionario") {
-                        popUpTo("questionario") {
+                    navController.navigate("entrar-questionario") {
+                        popUpTo("entrar-questionario") {
                             inclusive = true
                         }
                     }

@@ -18,12 +18,11 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import pt.isec.marco.quizec.ui.viewmodels.FirebaseViewModel
 import pt.isec.marco.quizec.ui.viewmodels.Partilha
-import pt.isec.marco.quizec.ui.viewmodels.Questionario
 import pt.isec.marco.quizec.utils.FStorageUtil
 
 
 @Composable
-fun QuestionarioScreen(
+fun EntrarQuestionarioScreen(
     viewModel: FirebaseViewModel,
     navController: NavHostController,
     codigoPartilha: String,
