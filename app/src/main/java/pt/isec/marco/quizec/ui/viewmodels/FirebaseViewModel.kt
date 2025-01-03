@@ -15,12 +15,8 @@ open class FirebaseViewModel : ViewModel() {
     private val _user = mutableStateOf(FAuthUtil.currentUser?.toUser())
     val perguntas = mutableStateOf(listOf<String>())
     val questionarios = mutableStateOf(listOf<String>())
-    val partilha = mutableStateOf(listOf<Partilha>())
+    val questionariosRespondidos = mutableStateOf(listOf<String>())
 
-    val duracao = mutableStateOf(0L)
-    val tempoEspera = mutableStateOf(0L)
-
-    val codigoQuestionario = mutableStateOf("")
 
     open val user : State<Utilizador?>
         get() = _user

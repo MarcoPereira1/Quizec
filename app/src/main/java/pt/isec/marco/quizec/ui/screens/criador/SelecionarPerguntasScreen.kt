@@ -38,11 +38,6 @@ fun SelecionarPerguntasScreen(
 ) {
     val perguntas by remember { viewModel.perguntasAux }
     var perguntasaux by remember { mutableStateOf<List<String>>(emptyList()) }
-    var firstTime by remember { mutableStateOf(true) }
-    if (firstTime) {
-        perguntasaux = viewModel.perguntas.value
-        firstTime = false
-    }
     LaunchedEffect(Unit) {
         viewModel.startPerguntasObserver()
     }

@@ -1,4 +1,4 @@
-package pt.isec.marco.quizec.ui.screens.criador
+package pt.isec.marco.quizec.ui.screens.utilizador
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -32,32 +32,48 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import pt.isec.marco.quizec.ui.screens.BackgroundWithImage
+import pt.isec.marco.quizec.ui.screens.criador.TipoPerguntaCard
+import pt.isec.marco.quizec.ui.viewmodels.Pergunta
 import pt.isec.marco.quizec.ui.viewmodels.Questionario
+import pt.isec.marco.quizec.utils.FStorageUtil
 
 
 @Composable
-fun HistoricoQuestionarioScreen(
+fun HistoricoQuestionarioRespondidosScreen(
     viewModel: FirebaseViewModel,
     navController: NavHostController,
     showComplete: Boolean
 ) {
-    val questionariosAux by remember { viewModel.questionariosAux }
+    val questionariosIds = viewModel.questionariosRespondidos.value
+    var questionarios by remember { mutableStateOf<List<Questionario>>(emptyList()) }
 
     BackgroundWithImage(
         modifier = Modifier.fillMaxSize()
     ) {
         LaunchedEffect(Unit) {
-            viewModel.startQuestionariosObserver()
+            questionarios = mutableListOf()
+
+            questionariosIds.forEach { questionarioId ->
+                FStorageUtil.getQuestionarioById(questionarioId) { questionario, _ ->
+                    if (questionario != null) {
+
+                        questionarios = questionarios + questionario
+                    }
+
+                }
+            }
         }
         Box(
             modifier = Modifier
                 .fillMaxSize()
         ) {
             val pagerState = rememberPagerState(pageCount = {
-                questionariosAux.size
+                questionarios.size
             })
             HorizontalPager(
                 state = pagerState,
@@ -72,7 +88,7 @@ fun HistoricoQuestionarioScreen(
                 ) {
                     Card(
                         viewModel = viewModel,
-                        questionario = questionariosAux[page],
+                        questionario = questionarios[page],
                         showComplete = showComplete
                     )
                 }
@@ -96,27 +112,6 @@ fun HistoricoQuestionarioScreen(
                             .size(16.dp)
                     )
                 }
-            }
-            Button(
-                onClick = {
-                    val currentQuestionario = questionariosAux.getOrNull(pagerState.currentPage)
-                    if (currentQuestionario != null) {
-                        navController.navigate(
-                            "partilhar-questionario/${
-                                currentQuestionario.id.removePrefix(
-                                    "questionario_"
-                                )
-                            }"
-                        )
-
-                    }
-
-                },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 64.dp)
-            ) {
-                Text("Partilhar questionário")
             }
         }
     }

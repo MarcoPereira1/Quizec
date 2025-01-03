@@ -28,12 +28,11 @@ import pt.isec.marco.quizec.ui.viewmodels.Partilha
 @Composable
 fun PartilharQuestionarioScreen(
     viewModel: FirebaseViewModel,
-    codigoQuestionario: MutableState<String>,
-    tempoEspera: MutableState<Long>,
-    duracao: MutableState<Long>,
+    idQuestionario: String,
 ) {
-
     var partilha by remember { mutableStateOf<Partilha?>(null) }
+    var tempoEspera by remember { mutableStateOf(0L) }
+    var duracao by remember { mutableStateOf(0L) }
 
     Column(
         modifier = Modifier
@@ -48,34 +47,25 @@ fun PartilharQuestionarioScreen(
                 .verticalScroll(scrollState)
                 .padding(16.dp),
         ) {
-            OutlinedTextField(
-                value = codigoQuestionario.value,
-                isError = codigoQuestionario.value.isEmpty(),
-                label = { Text("Código de Partilha:") },
-                onValueChange = { newText ->
-                    codigoQuestionario.value = newText
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
             Spacer(Modifier.height(16.dp))
 
             OutlinedTextField(
-                value = tempoEspera.value.toString(),
-                isError = tempoEspera.value <= 0,
+                value = tempoEspera.toString(),
+                isError = tempoEspera <= 0,
                 label = { Text("Tempo de Espera (em segundos):") },
                 onValueChange = { newText ->
-                    tempoEspera.value = newText.toLongOrNull() ?: 0L
+                    tempoEspera = newText.toLongOrNull() ?: 0L
                 },
                 modifier = Modifier.fillMaxWidth()
             )
             Spacer(Modifier.height(16.dp))
 
             OutlinedTextField(
-                value = duracao.value.toString(),
-                isError = duracao.value <= 0,
+                value = duracao.toString(),
+                isError = duracao <= 0,
                 label = { Text("Duração do Questionário (em segundos):") },
                 onValueChange = { newText ->
-                    duracao.value = newText.toLongOrNull() ?: 0L
+                    duracao = newText.toLongOrNull() ?: 0L
                 },
                 modifier = Modifier.fillMaxWidth()
             )
@@ -94,9 +84,9 @@ fun PartilharQuestionarioScreen(
                         viewModel.addPartilhaToFirestore(
                             Partilha(
                                 id = "",
-                                idQuestionario = codigoQuestionario.value,
-                                tempoEspera = tempoEspera.value,
-                                duracao = duracao.value
+                                idQuestionario = idQuestionario,
+                                tempoEspera = tempoEspera,
+                                duracao = duracao
                             )
                         )
                     }

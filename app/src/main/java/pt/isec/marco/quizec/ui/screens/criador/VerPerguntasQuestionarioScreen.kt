@@ -92,25 +92,6 @@ fun VerQuestionarioScreen(
                                 .padding(16.dp)
                         ) {
                             Column {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = "Pergunta: ${pergunta.titulo}",
-                                        color = Color.Blue,
-                                        modifier = Modifier
-                                            .weight(1f)
-                                    )
-                                    Icon(
-                                        imageVector = Icons.Default.Add,
-                                        contentDescription = "Seta para frente",
-                                        tint = Color.Blue,
-                                        modifier = Modifier
-                                            .clickable {
-
-                                            }
-                                    )
-                                }
                                 TipoPerguntaCard(
                                     pergunta = pergunta,
                                     showComplete = showComplete,

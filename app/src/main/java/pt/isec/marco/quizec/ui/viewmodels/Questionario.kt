@@ -7,7 +7,8 @@ data class Questionario(
     var idUtilizador: String,
     val descricao: String,
     val perguntas: List<Pergunta>,
-    val imagem: String
+    val imagem: String,
+    val questRespondidosIds: List<String>,
 ){
     companion object {
         fun fromFirestore(document: DocumentSnapshot): Questionario {
@@ -41,7 +42,8 @@ data class Questionario(
                 idUtilizador = document.getString("idUtilizador") ?: "",
                 descricao = document.getString("descricao") ?: "",
                 perguntas = listaPerguntas,
-                imagem = document.getString("imagem") ?: ""
+                imagem = document.getString("imagem") ?: "",
+                questRespondidosIds = document.get("quesRespondidosIds") as? List<String> ?: listOf(),
             )
         }
     }

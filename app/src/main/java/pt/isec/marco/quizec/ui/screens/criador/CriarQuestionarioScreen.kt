@@ -34,6 +34,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
 import pt.isec.marco.quizec.R
+import pt.isec.marco.quizec.ui.screens.BackgroundWithImage
 import pt.isec.marco.quizec.ui.viewmodels.FirebaseViewModel
 import pt.isec.marco.quizec.ui.viewmodels.Pergunta
 import pt.isec.marco.quizec.ui.viewmodels.Questionario
@@ -56,180 +57,186 @@ fun CriarQuestionarioScreen(
     val context = LocalContext.current
     var error by remember { mutableStateOf<String?>(null) }
     val picture = remember { mutableStateOf<String?>(null) }
-    val imagePath : String by lazy { FileUtils.getTempFilename(context) }
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
+    val imagePath: String by lazy { FileUtils.getTempFilename(context) }
+    BackgroundWithImage(
+        modifier = Modifier.fillMaxSize()
     ) {
-        Column(
-            horizontalAlignment = Alignment.End,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("User: ${viewModel.user.value?.email ?: ""}")
-        }
-        Column(
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(top = 48.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
+                .padding(16.dp)
         ) {
-            Spacer(Modifier.height(32.dp))
-            Text(
-                text = "Cria questionário",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.DarkGray
-            )
-            Spacer(Modifier.height(32.dp))
-            AdicionaImagens(picture, context, imagePath)
-            Spacer(Modifier.height(16.dp))
-            TextField(
-                value = descricao,
-                onValueChange = { newText ->
-                    descricao = newText
-                },
-                label = { Text("Descrição:") },
-                colors = TextFieldDefaults.colors(
-                    focusedContainerColor = Color.LightGray,
-                    unfocusedContainerColor = Color.LightGray,
-                    focusedIndicatorColor = Color.Blue,
-                    unfocusedIndicatorColor = Color.Gray,
-                    cursorColor = Color.Blue
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-
-            )
-            Spacer(Modifier.height(16.dp))
-            Button(
-                onClick = {
-                    navController.navigate("tipo-pergunta") {
-                        popUpTo("tipo-pergunta") { inclusive = true }
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                shape = RectangleShape
+            Column(
+                horizontalAlignment = Alignment.End,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Criar nova pergunta")
+                Text("User: ${viewModel.user.value?.email ?: ""}")
             }
-            Button(
-                onClick = {
-                    navController.navigate("seleciona-perguntas") {
-                        popUpTo("seleciona-perguntas") { inclusive = true }
-                    }
-                },
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                shape = RectangleShape
+                    .fillMaxSize()
+                    .padding(top = 48.dp),
+                verticalArrangement = Arrangement.Top,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("Adicionar perguntas já existentes")
-            }
-            Button(
-                onClick = {
-                    navController.navigate("ver-questionario") {
-                        popUpTo("ver-questionario") { inclusive = true }
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp)
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                shape = RectangleShape
-            ) {
-                Text("Ver questionário")
-            }
-        }
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.Bottom,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Button(
-                onClick = { confirmaDialog = true }
-            ) {
-                Text("Terminar Questionário")
-            }
-        }
-    }
+                Spacer(Modifier.height(32.dp))
+                Text(
+                    text = "Cria questionário",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.DarkGray
+                )
+                Spacer(Modifier.height(32.dp))
+                AdicionaImagens(picture, context, imagePath)
+                Spacer(Modifier.height(16.dp))
+                TextField(
+                    value = descricao,
+                    onValueChange = { newText ->
+                        descricao = newText
+                    },
+                    label = { Text("Descrição:") },
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.LightGray,
+                        unfocusedContainerColor = Color.LightGray,
+                        focusedIndicatorColor = Color.Blue,
+                        unfocusedIndicatorColor = Color.Gray,
+                        cursorColor = Color.Blue
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
 
-    if (confirmaDialog) {
-        val perguntasIds = viewModel.perguntas.value
-        var perguntas by remember { mutableStateOf<List<Pergunta>>(emptyList()) }
-        LaunchedEffect(perguntasIds) {
-            perguntas = getPerguntasByIds(perguntasIds)
-        }
-
-        GuardaQuestionario (
-            onConfirm = {
-                confirmaDialog = false
-                if (picture.value != null) {
-                    val fileUri: Uri = Uri.fromFile(picture.value?.let { File(it) })
-                    AMovServer.asyncUploadImage(
-                        inputStream = context.contentResolver.openInputStream(fileUri)!!,
-                        extension = "jpg",
-                        onResult = { result ->
-                            Log.d("AMovServer", "Result: $result")
-                            if (result != null) {
-                                imageUrl = result
-                                error = null
-
-                            } else {
-                                error = context.getString(R.string.error_uploading_image)
-                                imageUrl = null
-                            }
-                            viewModel.addQuestionarioToFirestore(
-                                Questionario(
-                                    id = "",
-                                    idUtilizador = FirebaseAuth.getInstance().currentUser?.uid ?: "",
-                                    descricao = nomeQuestionario,
-                                    perguntas = perguntas,
-                                    imagem = imageUrl ?: ""
-                                )
-                            )
+                )
+                Spacer(Modifier.height(16.dp))
+                Button(
+                    onClick = {
+                        navController.navigate("tipo-pergunta") {
+                            popUpTo("tipo-pergunta") { inclusive = true }
                         }
-                    )
-                }else{
-                    viewModel.addQuestionarioToFirestore(
-                        Questionario(
-                            id = "",
-                            idUtilizador = FirebaseAuth.getInstance().currentUser?.uid ?: "",
-                            descricao = nomeQuestionario,
-                            perguntas = perguntas,
-                            imagem = ""
-                        )
-                    )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    shape = RectangleShape
+                ) {
+                    Text("Criar nova pergunta")
                 }
-                viewModel.perguntas.value = emptyList()
-                mostraMsgSucesso = true
-            },
-            onDismiss = { confirmaDialog = false },
-            nomeQuestionario = nomeQuestionario,
-            onNomeChange = { nomeQuestionario = it }
-        )
-    }
-
-    if (mostraMsgSucesso) {
-        MsgSucesso (
-            message = "Questionário criado com sucesso!",
-            onDismiss = {
-                mostraMsgSucesso = false
-                navController.navigate("menu-criador") {
-                    popUpTo("menu-criador") { inclusive = true }
+                Button(
+                    onClick = {
+                        navController.navigate("seleciona-perguntas") {
+                            popUpTo("seleciona-perguntas") { inclusive = true }
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    shape = RectangleShape
+                ) {
+                    Text("Adicionar perguntas já existentes")
+                }
+                Button(
+                    onClick = {
+                        navController.navigate("ver-questionario") {
+                            popUpTo("ver-questionario") { inclusive = true }
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    shape = RectangleShape
+                ) {
+                    Text("Ver questionário")
                 }
             }
-        )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Bottom,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Button(
+                    onClick = { confirmaDialog = true }
+                ) {
+                    Text("Terminar Questionário")
+                }
+            }
+        }
+
+        if (confirmaDialog) {
+            val perguntasIds = viewModel.perguntas.value
+            var perguntas by remember { mutableStateOf<List<Pergunta>>(emptyList()) }
+            LaunchedEffect(perguntasIds) {
+                perguntas = getPerguntasByIds(perguntasIds)
+            }
+
+            GuardaQuestionario(
+                onConfirm = {
+                    confirmaDialog = false
+                    if (picture.value != null) {
+                        val fileUri: Uri = Uri.fromFile(picture.value?.let { File(it) })
+                        AMovServer.asyncUploadImage(
+                            inputStream = context.contentResolver.openInputStream(fileUri)!!,
+                            extension = "jpg",
+                            onResult = { result ->
+                                Log.d("AMovServer", "Result: $result")
+                                if (result != null) {
+                                    imageUrl = result
+                                    error = null
+
+                                } else {
+                                    error = context.getString(R.string.error_uploading_image)
+                                    imageUrl = null
+                                }
+                                viewModel.addQuestionarioToFirestore(
+                                    Questionario(
+                                        id = "",
+                                        idUtilizador = FirebaseAuth.getInstance().currentUser?.uid
+                                            ?: "",
+                                        descricao = nomeQuestionario,
+                                        perguntas = perguntas,
+                                        imagem = imageUrl ?: "",
+                                        questRespondidosIds = emptyList()
+                                    )
+                                )
+                            }
+                        )
+                    } else {
+                        viewModel.addQuestionarioToFirestore(
+                            Questionario(
+                                id = "",
+                                idUtilizador = FirebaseAuth.getInstance().currentUser?.uid ?: "",
+                                descricao = nomeQuestionario,
+                                perguntas = perguntas,
+                                imagem = "",
+                                questRespondidosIds = emptyList()
+                            )
+                        )
+                    }
+                    viewModel.perguntas.value = emptyList()
+                    mostraMsgSucesso = true
+                },
+                onDismiss = { confirmaDialog = false },
+                nomeQuestionario = nomeQuestionario,
+                onNomeChange = { nomeQuestionario = it }
+            )
+        }
+
+        if (mostraMsgSucesso) {
+            MsgSucesso(
+                message = "Questionário criado com sucesso!",
+                onDismiss = {
+                    mostraMsgSucesso = false
+                    navController.navigate("menu-criador") {
+                        popUpTo("menu-criador") { inclusive = true }
+                    }
+                }
+            )
+        }
     }
 }
-
 @Composable
 fun GuardaQuestionario(
     onConfirm: () -> Unit,

@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import pt.isec.marco.quizec.ui.screens.BackgroundWithImage
 import pt.isec.marco.quizec.ui.viewmodels.FirebaseViewModel
 
 @Composable
@@ -21,52 +22,58 @@ fun CriadorMenuScreen(
     viewModel: FirebaseViewModel,
     navController: NavHostController
 ) {
-    Column(
-        horizontalAlignment = Alignment.End,
-        modifier = Modifier.fillMaxWidth()
+    BackgroundWithImage(
+        modifier = Modifier.fillMaxSize()
     ) {
-        Text("User: ${viewModel.user.value?.email ?: ""}")
-    }
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Text("Menu Criador")
-        Spacer(modifier = Modifier.height(16.dp))
+        Column(
+            horizontalAlignment = Alignment.End,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("User: ${viewModel.user.value?.email ?: ""}")
+        }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text("Menu Criador")
+            Spacer(modifier = Modifier.height(16.dp))
 
-        Button(
-            onClick = {
-                navController.navigate("historico-questionarios") {
-                    popUpTo("historico-questionarios") {
-                        inclusive = true
+            Button(
+                onClick = {
+                    navController.navigate("historico-questionarios") {
+                        popUpTo("historico-questionarios") {
+                            inclusive = true
+                        }
                     }
                 }
+            ) {
+                Text("Meus questionarios")
             }
-        ) {
-            Text("Historico questionarios")
-        }
-        Button(
-            onClick = {
-                navController.navigate("criar-questionario") {
-                popUpTo("criar-questionario") {
-                    inclusive = true
-                }
-            }}
-        ) {
-            Text("Criar questionario")
-        }
-        Button(
-            onClick = {
-                navController.navigate("partilhar-questionario") {
-                    popUpTo("partilhar-questionario") {
-                        inclusive = true
+            Button(
+                onClick = {
+                    navController.navigate("criar-questionario") {
+                        popUpTo("criar-questionario") {
+                            inclusive = true
+                        }
                     }
-                }}
-        ) {
-            Text("Partilhar questionario")
+                }
+            ) {
+                Text("Criar questionario")
+            }
+            Button(
+                onClick = {
+                    navController.navigate("partilhar-questionario") {
+                        popUpTo("partilhar-questionario") {
+                            inclusive = true
+                        }
+                    }
+                }
+            ) {
+                Text("Partilhar questionario")
+            }
         }
     }
 }

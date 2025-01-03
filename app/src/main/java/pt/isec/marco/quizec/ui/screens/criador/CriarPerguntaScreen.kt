@@ -48,6 +48,7 @@ import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.google.firebase.auth.FirebaseAuth
 import pt.isec.marco.quizec.R
+import pt.isec.marco.quizec.ui.screens.BackgroundWithImage
 import pt.isec.marco.quizec.ui.viewmodels.FirebaseViewModel
 import pt.isec.marco.quizec.ui.viewmodels.Pergunta
 import pt.isec.marco.quizec.utils.AMovServer
@@ -842,7 +843,9 @@ fun CriarPerguntaScreen(
         return isValid
     }
 
-
+    BackgroundWithImage(
+        modifier = Modifier.fillMaxSize()
+    ) {
     Column(modifier = Modifier.fillMaxSize()) {
         AdicionaImagens(picture, context, imagePath)
         OutlinedTextField(
@@ -1206,6 +1209,7 @@ fun CriarPerguntaScreen(
         }
     }
 }
+    }
 
 @Composable
 fun AdicionaImagens(
