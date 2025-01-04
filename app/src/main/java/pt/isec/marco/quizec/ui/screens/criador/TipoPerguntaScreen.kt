@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -40,7 +41,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key.Companion.D
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
@@ -163,7 +167,14 @@ fun TipoPerguntaCard(
         )
     ) {
         val picture = remember { mutableStateOf<String?>(pergunta.imagem) }
-        MeteImagem(picture)
+        if(picture.value != "" && showComplete){
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                MeteImagem(picture)
+            }
+        }
         when(pergunta.tipo){
             "P01" -> PerguntaVF(pergunta, showComplete,answer,resposta)
             "P02" -> PerguntaEM(pergunta, showComplete,answer,false,resposta)
@@ -200,10 +211,6 @@ fun PerguntaVF(
             showAnswerBoolean = resposta[0].toBoolean()
         }
     }
-//    val showAnswerBoolean = when (showAnswer) {
-//        is ShowAnswer.BooleanAnswer -> showAnswer.value
-//        else -> null
-//    }
     Text(stringResource(R.string.P01_name))
     Spacer(modifier = Modifier.height(16.dp))
     Text("Pergunta: ${pergunta.titulo}")
@@ -213,13 +220,8 @@ fun PerguntaVF(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                var isChecked by remember { mutableStateOf<Boolean?>(null) }
+                var isChecked by remember { mutableStateOf(showAnswerBoolean) }
 
-                val checkboxColor = when (showAnswerBoolean) { // mudar para quando for a correcao
-                    true -> Color.Green
-                    false -> Color.Red
-                    else -> Color.Gray
-                }
                 Column(
                     modifier = Modifier
                         .weight(1f)
@@ -229,7 +231,7 @@ fun PerguntaVF(
                 ) {
                     Text("Verdadeiro")
                     Checkbox(
-                        checked = isChecked == true || showAnswerBoolean == true,
+                        checked = isChecked == true,
                         onCheckedChange = {
                             isChecked = if (it) true else null
                             if (it) {
@@ -240,10 +242,6 @@ fun PerguntaVF(
                             }
                         },
                         enabled = isEnable,
-                        colors = CheckboxDefaults.colors(
-                            checkedColor = checkboxColor,
-                            uncheckedColor = checkboxColor.copy(alpha = 0.6f)
-                        )
                     )
                 }
                 Column(
@@ -255,7 +253,7 @@ fun PerguntaVF(
                 ) {
                     Text("Falso")
                     Checkbox(
-                        checked = isChecked == false || showAnswerBoolean == false,
+                        checked = isChecked == false,
                         onCheckedChange = {
                             isChecked = if (it) false else null
                             if (it) {
@@ -263,14 +261,10 @@ fun PerguntaVF(
                                 resposta?.add("false")
                             }else{
                                 resposta?.clear()
-                                resposta?.add("null")
                             }
                         },
                         enabled = isEnable,
-                        colors = CheckboxDefaults.colors(
-                            checkedColor = checkboxColor,
-                            uncheckedColor = checkboxColor.copy(alpha = 0.6f)
-                        )
+
                     )
                 }
             }
@@ -301,30 +295,6 @@ fun PerguntaEM(
         isEnable = true
     }
 
-//
-//    val selectedAnswerIndex = when (showAnswer) {
-//        is ShowAnswer.IntAnswer -> showAnswer.value
-//        else -> null
-//    }
-//
-//    val selectedAnswerList = when (showAnswer) {
-//        is ShowAnswer.ListAnswer -> showAnswer.value
-//        else -> null
-//    }
-
-    val isAnswerCorrect = showAnswer != null
-    val checkboxColor = if (isAnswerCorrect) Color.Green else Color.Gray
-
-    if(mults){
-        if(selectedAnswerList == null){
-            isEnable = true
-        }
-    }else{
-        if(selectedAnswerIndex == null){
-            isEnable = true
-        }
-    }
-
     if (mults) {
         Text(stringResource(R.string.P02_name))
     } else {
@@ -337,7 +307,7 @@ fun PerguntaEM(
     if (showComplete) {
         Spacer(modifier = Modifier.height(16.dp))
 
-        var selected by remember { mutableStateOf<Int?>(null) }
+        var selected by remember { mutableStateOf<Int?>(selectedAnswerIndex) }
         var selectedMultiple by remember { mutableStateOf<List<Int>>(emptyList()) }
 
         pergunta.respostas.forEachIndexed { index, resposta ->
@@ -351,9 +321,9 @@ fun PerguntaEM(
                 )
                 Checkbox(
                     checked = if (mults) {
-                        selectedMultiple.contains(index) || (isAnswerCorrect && selectedAnswerList?.contains(index) == true)
+                        selectedMultiple.contains(index) ||  selectedAnswerList?.contains(index) == true
                     } else {
-                        selected == index || (isAnswerCorrect && selectedAnswerIndex == index)
+                        selected == index
                     },
                     onCheckedChange = {
                             if (mults) {
@@ -369,14 +339,12 @@ fun PerguntaEM(
                                 if (it) {
                                     respostas?.clear()
                                     respostas?.add(index.toString())
+                                }else{
+                                    respostas?.clear()
                                 }
                             }
                     },
-                    enabled = isEnable,
-                    colors = CheckboxDefaults.colors(
-                        checkedColor = checkboxColor,
-                        uncheckedColor = checkboxColor.copy(alpha = 0.6f)
-                    )
+                    enabled = isEnable
                 )
             }
         }
@@ -400,10 +368,14 @@ fun PerguntaCorrespondecia(
         is ShowAnswer.ListAnswer -> showAnswer.value
         else ->  null
     }
-    Text(stringResource(R.string.P04_name))
-    Spacer(modifier = Modifier.height(16.dp))
+    if(respostas == null){
+        Text(stringResource(R.string.P04_name))
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+
     Text("Pergunta: ${pergunta.titulo}")
     Spacer(modifier = Modifier.height(16.dp))
+    var heigth by remember { mutableStateOf(58.dp) }
     if (showComplete) {
         Row(
             modifier = Modifier.fillMaxWidth()
@@ -417,18 +389,22 @@ fun PerguntaCorrespondecia(
                 for (i in 0 until pergunta.respostas.size / 2) {
                     Row(
                         modifier = Modifier
-                            .padding(8.dp)
+                            .padding(4.dp)
                     ) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f)
+                                .height(heigth)
                                 .padding(all = 3.dp)
                                 .clip(RoundedCornerShape(4.dp))
                                 .background(Color.LightGray)
+                                .align(Alignment.CenterVertically),
+                            contentAlignment = Alignment.Center
                         ) {
                             Row(
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxSize()
                             ) {
                                 Text(
                                     text = "${('A' + i)}.",
@@ -445,18 +421,22 @@ fun PerguntaCorrespondecia(
                             }
                         }
 
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
 
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f)
+                                .height(heigth)
                                 .padding(all = 3.dp)
                                 .clip(RoundedCornerShape(4.dp))
                                 .background(Color.LightGray)
+                                .align(Alignment.CenterVertically),
+                            contentAlignment = Alignment.Center
                         ) {
                             Row(
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.fillMaxSize()
                             ) {
                                 Text(
                                     text = "${i + 1}. ",
@@ -484,33 +464,36 @@ fun PerguntaCorrespondecia(
                 for (i in 0 until pergunta.respostas.size / 2) {
                     Row(
                         modifier = Modifier
-                            .padding(8.dp)
+                            .padding(4.dp)
                     ) {
                         Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f)
+                                .size(heigth)
                                 .padding(all = 3.dp)
                                 .clip(RoundedCornerShape(4.dp))
                                 .background(Color.LightGray)
+                                .align(Alignment.CenterVertically),
+                            contentAlignment = Alignment.Center
                         ) {
                             Text(
                                 text = ('A' + i).toString(),
                                 fontSize = 16.sp,
-                                modifier = Modifier.padding(start = 8.dp),
                                 color = Color.Blue
                             )
                         }
 
-                        Spacer(modifier = Modifier.width(8.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
+
 
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .weight(1f)
+                                .height(heigth)
                                 .padding(all = 3.dp)
                                 .clip(RoundedCornerShape(4.dp))
-                                .background(Color.LightGray)
+                                .background(Color.LightGray),
+                            contentAlignment = Alignment.Center
                         ) {
                             if(selectedAnswerList != null){
                                 Text(
@@ -523,7 +506,6 @@ fun PerguntaCorrespondecia(
                                 var upperCaseText by remember {
                                     mutableStateOf( "")
                                 }
-
                                 TextField(
                                     value = upperCaseText,
                                     onValueChange = { newText ->
@@ -532,23 +514,17 @@ fun PerguntaCorrespondecia(
                                             respostas?.set(i, newText)
                                         }
                                     },
-                                    label = { Text("R:") },
-                                    placeholder = { Text(".") }
+                                    modifier = Modifier
+                                        .padding(all = 1.dp)
+//                                        .width(60.dp)
+//                                        .height(60.dp)
+//                                        .background(Color.LightGray),
+                                            ,
+                                    textStyle = TextStyle(
+                                        textAlign = TextAlign.Center,
+                                        fontSize = 16.sp
+                                    )
                                 )
-
-//                                TextField(
-//                                    value = upperCaseText,
-//                                    onValueChange = { newText ->
-//                                        if (newText.length == 1 && newText[0].isLetter()) {
-//                                            upperCaseText = newText.uppercase()
-//                                        }
-//                                    },
-//                                    modifier = Modifier
-//                                        .padding(all = 8.dp)
-//                                        .width(32.dp)
-//                                        .height(32.dp)
-//                                        .background(Color.LightGray)
-//                                )
                             }
                         }
                     }
@@ -566,6 +542,7 @@ fun PerguntaOrdenacao(
     respostas: MutableList<String>?=null
 
     ) {
+    var heigth by remember { mutableStateOf(58.dp) }
 
     if (respostas != null) {
         while (respostas.size < pergunta.respostas.size) {
@@ -576,8 +553,11 @@ fun PerguntaOrdenacao(
         is ShowAnswer.ListAnswer -> showAnswer.value
         else -> null
     }
-    Text(stringResource(R.string.P05_name))
-    Spacer(modifier = Modifier.height(16.dp))
+    if(respostas == null){
+        Text(stringResource(R.string.P05_name))
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+
     Text("Pergunta: ${pergunta.titulo}")
     Spacer(modifier = Modifier.height(16.dp))
     if (showComplete) {
@@ -597,15 +577,19 @@ fun PerguntaOrdenacao(
                     ) {
                         Box(
                             modifier = Modifier
-                                .height(40.dp)
                                 .fillMaxWidth()
                                 .weight(1f)
+                                .height(heigth)
                                 .padding(all = 3.dp)
                                 .clip(RoundedCornerShape(4.dp))
                                 .background(Color.LightGray)
+                                .align(Alignment.CenterVertically),
+                            contentAlignment = Alignment.Center
                         ) {
                             Row(
+                                modifier = Modifier.fillMaxSize(),
                                 verticalAlignment = Alignment.CenterVertically
+
                             ) {
                                 Text(
                                     text = "${(i + 1)}.",
@@ -637,12 +621,14 @@ fun PerguntaOrdenacao(
                     ) {
                         Box(
                             modifier = Modifier
-                                .height(60.dp)
                                 .fillMaxWidth()
                                 .weight(1f)
+                                .height(heigth)
                                 .padding(all = 3.dp)
                                 .clip(RoundedCornerShape(4.dp))
                                 .background(Color.LightGray)
+                                .align(Alignment.CenterVertically),
+                            contentAlignment = Alignment.Center
                         ) {
                             if (selectedAnswerList != null) {
                                 Text(
@@ -665,7 +651,9 @@ fun PerguntaOrdenacao(
                                         }
                                     },
                                     label = { Text("R:") },
-                                    placeholder = { Text(".") }
+                                    modifier = Modifier
+                                        .padding(all = 1.dp)
+
                                 )
                             }
                         }
@@ -687,12 +675,12 @@ fun PerguntaEspacosEmBranco(
         is ShowAnswer.StringAnswer -> showAnswer.value
         else ->  ""
     }
-    Text(stringResource(R.string.P06_name))
-    Spacer(modifier = Modifier.height(16.dp))
+    if(resposta == null){
+        Text(stringResource(R.string.P06_name))
+        Spacer(modifier = Modifier.height(16.dp))
+    }
     Text("Pergunta: ${pergunta.titulo}")
     Spacer(modifier = Modifier.height(16.dp))
-
-
 
     if (showComplete) {
         Column(
@@ -718,7 +706,7 @@ fun PerguntaAssociacao(
     pergunta: Pergunta,
     showComplete: Boolean = false,
     showAnswer: ShowAnswer?,
-    resposta: MutableList<String>?=null
+    respostas: MutableList<String>?=null
 ) {
     val answerListStrings = when (showAnswer) {
         is ShowAnswer.ListStringAnswer -> showAnswer.value
@@ -728,16 +716,18 @@ fun PerguntaAssociacao(
     val selectedAnswerIndex = answerListStrings?.getOrNull(1)?.toIntOrNull()
 
     val stringAnswer = answerListStrings?.getOrNull(0)
-    Text(stringResource(R.string.P07_name))
-    Spacer(modifier = Modifier.height(16.dp))
+    if(respostas == null){
+        Text(stringResource(R.string.P07_name))
+        Spacer(modifier = Modifier.height(16.dp))
+    }
     Text("Pergunta: ${pergunta.titulo}")
     val picture = remember { mutableStateOf<String?>(stringAnswer) }
-    MeteImagem(picture)
-    Spacer(modifier = Modifier.height(16.dp))
+    if( picture.value != ""){
+        MeteImagem(picture)
+        Spacer(modifier = Modifier.height(16.dp))
+    }
 
-    var selected by remember { mutableStateOf<Int?>(null) }
-    val isAnswerCorrect = true
-    val checkboxColor = if (isAnswerCorrect) Color.Green else Color.Gray
+    var selected by remember { mutableStateOf(selectedAnswerIndex) }
 
     Log.d("PerguntaAssociacao", "Resposta correta: $selectedAnswerIndex")
     pergunta.respostaCerta.forEachIndexed { index, resposta ->
@@ -751,15 +741,17 @@ fun PerguntaAssociacao(
             )
             Checkbox(
                 checked =
-                selected == index || (isAnswerCorrect && selectedAnswerIndex == index),
+                selected == index ,
                 onCheckedChange = {
                     selected = if (it) index else null
+                    if(it){
+                        respostas?.clear()
+                        respostas?.add(index.toString())
+                    }else{
+                        respostas?.clear()
+                    }
                 },
                 enabled = selectedAnswerIndex == null,
-                colors = CheckboxDefaults.colors(
-                    checkedColor = checkboxColor,
-                    uncheckedColor = checkboxColor.copy(alpha = 0.6f)
-                )
             )
         }
     }
@@ -785,9 +777,11 @@ fun PerguntaPalavras(
         is ShowAnswer.IntAnswer -> showAnswer.value
         else ->  -1
     }
+    if(respostas == null){
+        Text(stringResource(R.string.P08_name))
+        Spacer(modifier = Modifier.height(16.dp))
+    }
 
-    Text(stringResource(R.string.P08_name))
-    Spacer(modifier = Modifier.height(16.dp))
     Text("Pergunta: ${pergunta.titulo}")
 
     if (showComplete) {

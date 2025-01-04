@@ -55,6 +55,16 @@ fun VerQuestionarioScreen(
             }
         }
     }
+    Column {
+        for(pergunta in perguntas) {
+            TipoPerguntaCard(
+                pergunta = pergunta,
+                showComplete = showComplete,
+            )
+        }
+    }
+
+
 
     if (perguntaSelecionada != null) {
         TipoPerguntaCard(
@@ -74,7 +84,6 @@ fun VerQuestionarioScreen(
                             .shadow(4.dp)
                             .clickable {
                                 perguntaSelecionada = pergunta
-
                             },
                         contentAlignment = Alignment.Center
                     ) {
@@ -91,12 +100,8 @@ fun VerQuestionarioScreen(
                                 )
                                 .padding(16.dp)
                         ) {
-                            Column {
-                                TipoPerguntaCard(
-                                    pergunta = pergunta,
-                                    showComplete = showComplete,
-                                )
-                            }
+                            Log.d("Pergunta", pergunta.toString())
+
                         }
                     }
                 }
