@@ -69,9 +69,9 @@ fun PartilharQuestionarioScreen(
                 },
                 modifier = Modifier.fillMaxWidth()
             )
+
             Spacer(Modifier.height(16.dp))
 
-            // Botão para iniciar a partilha
             Column(
                 modifier = Modifier
                     .fillMaxSize()

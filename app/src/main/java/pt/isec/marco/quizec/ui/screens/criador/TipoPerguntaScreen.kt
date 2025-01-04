@@ -211,8 +211,10 @@ fun PerguntaVF(
             showAnswerBoolean = resposta[0].toBoolean()
         }
     }
-    Text(stringResource(R.string.P01_name))
-    Spacer(modifier = Modifier.height(16.dp))
+    if(resposta == null){
+        Text(stringResource(R.string.P01_name))
+        Spacer(modifier = Modifier.height(16.dp))
+    }
     Text("Pergunta: ${pergunta.titulo}")
     if (showComplete) {
         Spacer(modifier = Modifier.height(16.dp))
@@ -295,11 +297,14 @@ fun PerguntaEM(
         isEnable = true
     }
 
-    if (mults) {
-        Text(stringResource(R.string.P02_name))
-    } else {
-        Text(stringResource(R.string.P03_name))
+    if(respostas == null){
+        if (mults) {
+            Text(stringResource(R.string.P02_name))
+        } else {
+            Text(stringResource(R.string.P03_name))
+        }
     }
+
 
     Spacer(modifier = Modifier.height(8.dp))
     Text("Pergunta: ${pergunta.titulo}")
@@ -372,7 +377,6 @@ fun PerguntaCorrespondecia(
         Text(stringResource(R.string.P04_name))
         Spacer(modifier = Modifier.height(16.dp))
     }
-
     Text("Pergunta: ${pergunta.titulo}")
     Spacer(modifier = Modifier.height(16.dp))
     var heigth by remember { mutableStateOf(58.dp) }
@@ -542,7 +546,7 @@ fun PerguntaOrdenacao(
     respostas: MutableList<String>?=null
 
     ) {
-    var heigth by remember { mutableStateOf(58.dp) }
+    val heigth by remember { mutableStateOf(58.dp) }
 
     if (respostas != null) {
         while (respostas.size < pergunta.respostas.size) {
@@ -653,7 +657,6 @@ fun PerguntaOrdenacao(
                                     label = { Text("R:") },
                                     modifier = Modifier
                                         .padding(all = 1.dp)
-
                                 )
                             }
                         }
@@ -673,9 +676,9 @@ fun PerguntaEspacosEmBranco(
 ) {
     val selectedAnswerString = when (showAnswer) {
         is ShowAnswer.StringAnswer -> showAnswer.value
-        else ->  ""
+        else -> ""
     }
-    if(resposta == null){
+    if (resposta == null) {
         Text(stringResource(R.string.P06_name))
         Spacer(modifier = Modifier.height(16.dp))
     }
@@ -687,7 +690,7 @@ fun PerguntaEspacosEmBranco(
             modifier = Modifier
                 .padding(8.dp)
                 .fillMaxSize()
-        ){
+        ) {
             if (selectedAnswerString != null) {
                 Text(selectedAnswerString)
             }
@@ -790,7 +793,6 @@ fun PerguntaPalavras(
                 .padding(8.dp)
                 .fillMaxSize()
         ){
-
             if (selectedAnswerString != null) {
                 if (respostas != null) {
                     T06_Opcoes(

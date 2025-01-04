@@ -52,7 +52,6 @@ fun SelecionarPerguntasScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(perguntas) { pergunta ->
-
                     var isSelected by remember { mutableStateOf(false) }
                     var wasSelected by remember { mutableStateOf(false) }
 
@@ -125,10 +124,10 @@ fun SelecionarPerguntasScreen(
                                             }
                                     )
                                 }
-                                TipoPerguntaCard(
-                                    pergunta = pergunta,
-                                    showComplete = showComplete
-                                )
+//                                TipoPerguntaCard(
+//                                    pergunta = pergunta,
+//                                    showComplete = showComplete
+//                                )
                             }
                         }
                     }
