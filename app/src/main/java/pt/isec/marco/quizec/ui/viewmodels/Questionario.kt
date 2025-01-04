@@ -9,7 +9,9 @@ data class Questionario(
     val perguntas: List<Pergunta>,
     val imagem: String,
     val questRespondidosIds: List<String>,
-){
+    val questPartilhadosIds: List<String>,
+
+    ){
     companion object {
         fun fromFirestore(document: DocumentSnapshot): Questionario {
             val perguntas = document.get("perguntas") as? List<Map<String, Any>> ?: listOf()
@@ -44,6 +46,7 @@ data class Questionario(
                 perguntas = listaPerguntas,
                 imagem = document.getString("imagem") ?: "",
                 questRespondidosIds = document.get("quesRespondidosIds") as? List<String> ?: listOf(),
+                questPartilhadosIds = document.get("questPartilhadosIds") as? List<String> ?: listOf()
             )
         }
     }

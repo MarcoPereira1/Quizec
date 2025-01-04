@@ -63,17 +63,6 @@ fun CriadorMenuScreen(
             ) {
                 Text("Criar questionario")
             }
-            Button(
-                onClick = {
-                    navController.navigate("partilhar-questionario") {
-                        popUpTo("partilhar-questionario") {
-                            inclusive = true
-                        }
-                    }
-                }
-            ) {
-                Text("Partilhar questionario")
-            }
         }
     }
 }

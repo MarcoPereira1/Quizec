@@ -198,7 +198,8 @@ fun CriarQuestionarioScreen(
                                         descricao = nomeQuestionario,
                                         perguntas = perguntas,
                                         imagem = imageUrl ?: "",
-                                        questRespondidosIds = emptyList()
+                                        questRespondidosIds = emptyList(),
+                                        questPartilhadosIds = emptyList()
                                     )
                                 )
                             }
@@ -211,7 +212,8 @@ fun CriarQuestionarioScreen(
                                 descricao = nomeQuestionario,
                                 perguntas = perguntas,
                                 imagem = "",
-                                questRespondidosIds = emptyList()
+                                questRespondidosIds = emptyList(),
+                                questPartilhadosIds = emptyList()
                             )
                         )
                     }
