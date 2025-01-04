@@ -55,16 +55,6 @@ fun VerQuestionarioScreen(
             }
         }
     }
-    Column {
-        for(pergunta in perguntas) {
-            TipoPerguntaCard(
-                pergunta = pergunta,
-                showComplete = showComplete,
-            )
-        }
-    }
-
-
 
     if (perguntaSelecionada != null) {
         TipoPerguntaCard(
@@ -75,10 +65,10 @@ fun VerQuestionarioScreen(
         Text("Nenhuma pergunta disponível")
     } else {
         Box(modifier = Modifier.fillMaxSize()) {
-            LazyColumn(
+            Column (
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(perguntas) { pergunta ->
+                perguntas.forEach { pergunta ->
                     Box(
                         modifier = Modifier
                             .shadow(4.dp)
@@ -100,8 +90,10 @@ fun VerQuestionarioScreen(
                                 )
                                 .padding(16.dp)
                         ) {
-                            Log.d("Pergunta", pergunta.toString())
-
+                            TipoPerguntaCard(
+                                pergunta = pergunta,
+                                showComplete = showComplete,
+                            )
                         }
                     }
                 }
@@ -113,7 +105,6 @@ fun VerQuestionarioScreen(
                             inclusive = true
                         }
                     }
-
                 },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)

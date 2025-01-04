@@ -131,7 +131,8 @@ fun ResponderQuestionarioScreen(
         descricao = "descricao",
         perguntas = perguntasList,
         imagem = "http://amov.servehttp.com:11111/file/uploaded-1735618972183-file.jpg",
-        questRespondidosIds = emptyList()
+        questRespondidosIds = emptyList(),
+        questPartilhadosIds = emptyList()
     )
 
     val respostas = remember { mutableStateListOf<MutableList<String>>() }
