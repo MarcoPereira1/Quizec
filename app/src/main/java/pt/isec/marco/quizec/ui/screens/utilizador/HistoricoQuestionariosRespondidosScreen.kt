@@ -1,5 +1,6 @@
 package pt.isec.marco.quizec.ui.screens.utilizador
 
+import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,21 +27,20 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.rememberPagerState
-
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
 import androidx.compose.material3.CardDefaults
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import com.google.firebase.auth.FirebaseAuth
 import pt.isec.marco.quizec.ui.screens.BackgroundWithImage
 import pt.isec.marco.quizec.ui.screens.criador.TipoPerguntaCard
-import pt.isec.marco.quizec.ui.viewmodels.Pergunta
 import pt.isec.marco.quizec.ui.viewmodels.Questionario
 import pt.isec.marco.quizec.utils.FStorageUtil
+import pt.isec.marco.quizec.utils.FStorageUtil.Companion.getQuestionarioIdRespondidosByUser
 
 
 @Composable
@@ -49,68 +49,80 @@ fun HistoricoQuestionarioRespondidosScreen(
     navController: NavHostController,
     showComplete: Boolean
 ) {
-    val questionariosIds = viewModel.questionariosRespondidos.value
+    var questionariosIds by remember { mutableStateOf<List<String>>(emptyList()) }
     var questionarios by remember { mutableStateOf<List<Questionario>>(emptyList()) }
 
     BackgroundWithImage(
         modifier = Modifier.fillMaxSize()
     ) {
         LaunchedEffect(Unit) {
-            questionarios = mutableListOf()
-
-            questionariosIds.forEach { questionarioId ->
-                FStorageUtil.getQuestionarioById(questionarioId) { questionario, _ ->
-                    if (questionario != null) {
-
-                        questionarios = questionarios + questionario
+            getQuestionarioIdRespondidosByUser(
+                userId = FirebaseAuth.getInstance().currentUser?.uid ?: "",
+                onResult = { idQuestionarios ->
+                    if (idQuestionarios.isNotEmpty()) {
+                        questionariosIds = idQuestionarios
+                        questionariosIds.forEach { questionarioId ->
+                            FStorageUtil.getQuestionarioById(questionarioId) { questionario, _ ->
+                                if (questionario != null) {
+                                    questionarios += questionario
+                                }
+                            }
+                        }
+                    } else {
+                        Log.d("App", "Nenhum questionário encontrado para este usuário.")
                     }
-
+                },
+                onError = { exception ->
+                    Log.e("App", "Erro ao procurar partilhas: ${exception.message}")
                 }
-            }
+            )
         }
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-        ) {
-            val pagerState = rememberPagerState(pageCount = {
-                questionarios.size
-            })
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier.fillMaxSize()
-            ) { page ->
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(4.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .padding(2.dp)
-                ) {
-                    Card(
-                        viewModel = viewModel,
-                        questionario = questionarios[page],
-                        showComplete = showComplete
-                    )
-                }
-            }
-            Row(
-                Modifier
-                    .align(Alignment.BottomCenter)
-                    .wrapContentHeight()
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                horizontalArrangement = Arrangement.Center
+
+        if (questionarios.isNotEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
             ) {
-                repeat(pagerState.pageCount) { iteration ->
-                    val color =
-                        if (pagerState.currentPage == iteration) Color.DarkGray else Color.LightGray
+                val pagerState = rememberPagerState(pageCount = {
+                    questionarios.size
+                })
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize()
+                ) { page ->
                     Box(
                         modifier = Modifier
+                            .fillMaxSize()
+                            .padding(4.dp)
+                            .clip(RoundedCornerShape(16.dp))
                             .padding(2.dp)
-                            .clip(CircleShape)
-                            .background(color)
-                            .size(16.dp)
-                    )
+                    ) {
+                        Card(
+                            viewModel = viewModel,
+                            questionario = questionarios[page],
+                            showComplete = showComplete
+                        )
+                    }
+                }
+                Row(
+                    Modifier
+                        .align(Alignment.BottomCenter)
+                        .wrapContentHeight()
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    repeat(pagerState.pageCount) { iteration ->
+                        val color =
+                            if (pagerState.currentPage == iteration) Color.DarkGray else Color.LightGray
+                        Box(
+                            modifier = Modifier
+                                .padding(2.dp)
+                                .clip(CircleShape)
+                                .background(color)
+                                .size(16.dp)
+                        )
+                    }
                 }
             }
         }
@@ -123,38 +135,34 @@ fun Card(
     questionario: Questionario,
     showComplete: Boolean
 ) {
-    if (questionario != null) {
-        Card(
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        elevation = CardDefaults.cardElevation(8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(255, 224, 192))
+    ) {
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            elevation = CardDefaults.cardElevation(8.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(255, 224, 192))
+                .padding(16.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-            ) {
-                Text(
-                    text = "Título do Questionário: ${questionario.descricao}",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
+            Text(
+                text = "Título do Questionário: ${questionario.descricao}",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold
+            )
+
+            questionario.perguntas?.forEach { pergunta ->
+                Text("Pergunta: ${pergunta.titulo}")
+                TipoPerguntaCard(
+                    pergunta = pergunta,
+                    showComplete = showComplete,
                 )
-
-                questionario.perguntas?.forEach { pergunta ->
-                    Text("Pergunta: ${pergunta.titulo}")
-                    TipoPerguntaCard(
-                        pergunta = pergunta,
-                        showComplete = showComplete,
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
             }
+
+            Spacer(modifier = Modifier.height(8.dp))
         }
-    } else {
-        Text("Nenhum questionário disponível")
     }
 }
 

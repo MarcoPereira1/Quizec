@@ -17,7 +17,6 @@ open class FirebaseViewModel : ViewModel() {
     private val _user = mutableStateOf(FAuthUtil.currentUser?.toUser())
     val perguntas = mutableStateOf(listOf<String>())
     val questionarios = mutableStateOf(listOf<String>())
-    val questionariosRespondidos = mutableStateOf(listOf<String>())
 
 
     open val user : State<Utilizador?>
@@ -79,16 +78,25 @@ open class FirebaseViewModel : ViewModel() {
 
     private val _error2 = MutableStateFlow<String?>(null)
     val error2: StateFlow<String?> = _error2
+
+    private val _partilhaId = MutableStateFlow<String?>(null)
+    val partilhaId: StateFlow<String?> = _partilhaId
+
     fun addPartilhaToFirestore(partilha: Partilha) {
         viewModelScope.launch {
-            FStorageUtil.addPartilhaToFirestore({ exception ->
-                _error.value = exception?.message
-                _partilhaSuccess.value = false
+            FStorageUtil.addPartilhaToFirestore({ error, partilhaId ->
+                if (error != null) {
+                    _error.value = error.message // Atualiza a variável de erro no estado
+                    _partilhaSuccess.value = false
+                } else {
+                    _partilhaSuccess.value = true // Sucesso, a partilha foi criada com sucesso
+                    _partilhaId.value = partilhaId // Atualiza o StateFlow com o ID gerado
+                }
             }, partilha, this@FirebaseViewModel)
-
-            _partilhaSuccess.value = true
         }
     }
+
+
     fun resetSuccessState() {
         _partilhaSuccess.value = false
     }
@@ -97,7 +105,6 @@ open class FirebaseViewModel : ViewModel() {
             FStorageUtil.addRespostasToPartilha(idPartilha, respostaList,FirebaseAuth.getInstance().currentUser?.uid ?: "" )
         }
     }
-
 
     private val _questionariosAux = mutableStateOf<List<Questionario>>(emptyList())
     val questionariosAux: State<List<Questionario>> get() = _questionariosAux

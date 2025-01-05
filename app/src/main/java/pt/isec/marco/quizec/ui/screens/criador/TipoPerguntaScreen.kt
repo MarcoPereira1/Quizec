@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.ui.Alignment
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.rememberPagerState
-
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
@@ -31,17 +29,14 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key.Companion.D
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -61,7 +56,6 @@ sealed class ShowAnswer {
     data class ListStringAnswer(val value: List<String>) : ShowAnswer()
 }
 
-
 @Composable
 fun TipoPerguntaCard(
     pergunta: Pergunta,
@@ -69,110 +63,116 @@ fun TipoPerguntaCard(
     resposta: MutableList<String>?=null,
 ) {
     var answer by remember { mutableStateOf<ShowAnswer?>(null) }
-        answer = when (pergunta.tipo) {
-            "P01" -> {
-                when (pergunta.respostaCerta.getOrNull(0)) {
-                    "true" -> ShowAnswer.BooleanAnswer(true)
-                    "false" -> ShowAnswer.BooleanAnswer(false)
-                    else -> ShowAnswer.NotAnswered
-                }
+    answer = when (pergunta.tipo) {
+        "P01" -> {
+            when (pergunta.respostaCerta.getOrNull(0)) {
+                "true" -> ShowAnswer.BooleanAnswer(true)
+                "false" -> ShowAnswer.BooleanAnswer(false)
+                else -> ShowAnswer.NotAnswered
             }
+        }
 
-            "P02" -> {
-                val respostaIndex = pergunta.respostaCerta.getOrNull(0)?.toIntOrNull()
-                if (respostaIndex == null) {
-                    ShowAnswer.NotAnswered
-                } else {
-                    ShowAnswer.IntAnswer(respostaIndex)
-                }
-            }
-
-            "P03" -> {
-                val respostaIndex = pergunta.respostaCerta.mapNotNull { it.toIntOrNull() }
-                if (respostaIndex.isEmpty()) {
-                    ShowAnswer.NotAnswered
-                } else {
-                    ShowAnswer.ListAnswer(respostaIndex)
-                }
-            }
-
-            "P04" -> {
-                if (pergunta.respostaCerta.isEmpty()) {
-                    ShowAnswer.NotAnswered
-                } else {
-                    val respostaIndex = List(pergunta.respostas.size / 2) { -1 }.toMutableList()
-                    for (i in 0 until pergunta.respostaCerta.size / 2) {
-                        val index = pergunta.respostaCerta.indexOf(pergunta.respostas[i])
-                        val index2 =
-                            pergunta.respostas.indexOf(pergunta.respostaCerta[index + pergunta.respostas.size / 2])
-                        respostaIndex[i] = index2 - pergunta.respostas.size / 2 + 1
-                    }
-                    ShowAnswer.ListAnswer(respostaIndex)
-                }
-
-            }
-
-            "P05" -> {
-                if (pergunta.respostaCerta.isEmpty()) {
-                    ShowAnswer.NotAnswered
-                } else {
-                    val respostaIndex = List(pergunta.respostas.size) { -1 }.toMutableList()
-                    for (i in 0 until pergunta.respostaCerta.size) {
-                        val index = pergunta.respostaCerta.indexOf(pergunta.respostas[i])
-                        respostaIndex[index] = i + 1
-                    }
-                    ShowAnswer.ListAnswer(respostaIndex)
-                }
-            }
-
-            "P06" -> {
-                val frase = pergunta.respostas.getOrNull(0)
-                var i = 1
-                val result = StringBuilder()
-
-                var j = 0
-
-                if (frase != null) {
-                    for (char in frase) {
-                        if (char == '_' && j < pergunta.respostaCerta.size) {
-                            result.append("[$i. \"${pergunta.respostaCerta[j]}\"]")
-                            i++
-                            j++
-                        } else {
-
-                            result.append(char)
-                        }
-                    }
-                }
-                ShowAnswer.StringAnswer(result.toString())
-            }
-
-            "P07" -> {
-                val respostaStrings = pergunta.respostas.map { it }
-                if (respostaStrings.isEmpty()) {
-                    ShowAnswer.NotAnswered
-                } else {
-                    ShowAnswer.ListStringAnswer(respostaStrings)
-                }
-            }
-
-            "P08" -> {
-                val respostaIndex = pergunta.respostas.getOrNull(0)?.toIntOrNull()
+        "P02" -> {
+            val respostaIndex = pergunta.respostaCerta.getOrNull(0)?.toIntOrNull()
+            if (respostaIndex == null) {
+                ShowAnswer.NotAnswered
+            } else {
                 ShowAnswer.IntAnswer(respostaIndex)
             }
-
-            else -> ShowAnswer.NotAnswered
         }
-        Card(
+
+        "P03" -> {
+            val respostaIndex = pergunta.respostaCerta.mapNotNull { it.toIntOrNull() }
+            if (respostaIndex.isEmpty()) {
+                ShowAnswer.NotAnswered
+            } else {
+                ShowAnswer.ListAnswer(respostaIndex)
+            }
+        }
+
+        "P04" -> {
+            if (pergunta.respostaCerta.isEmpty()) {
+                ShowAnswer.NotAnswered
+            } else {
+                val respostaIndex = List(pergunta.respostas.size / 2) { -1 }.toMutableList()
+                for (i in 0 until pergunta.respostaCerta.size / 2) {
+                    val index = pergunta.respostaCerta.indexOf(pergunta.respostas[i])
+                    val index2 =
+                        pergunta.respostas.indexOf(pergunta.respostaCerta[index + pergunta.respostas.size / 2])
+                    respostaIndex[i] = index2 - pergunta.respostas.size / 2 + 1
+                }
+                ShowAnswer.ListAnswer(respostaIndex)
+            }
+
+        }
+
+        "P05" -> {
+            if (pergunta.respostaCerta.isEmpty()) {
+                ShowAnswer.NotAnswered
+            } else {
+                val respostaIndex = List(pergunta.respostas.size) { -1 }.toMutableList()
+                for (i in 0 until pergunta.respostaCerta.size) {
+                    val index = pergunta.respostaCerta.indexOf(pergunta.respostas[i])
+                    respostaIndex[index] = i + 1
+                }
+                ShowAnswer.ListAnswer(respostaIndex)
+            }
+        }
+
+        "P06" -> {
+            val frase = pergunta.respostas.getOrNull(0)
+            var i = 1
+            val result = StringBuilder()
+
+            var j = 0
+
+            if (frase != null) {
+                for (char in frase) {
+                    if (char == '_' && j < pergunta.respostaCerta.size) {
+                        result.append("[$i. \"${pergunta.respostaCerta[j]}\"]")
+                        i++
+                        j++
+                    } else {
+
+                        result.append(char)
+                    }
+                }
+            }
+            ShowAnswer.StringAnswer(result.toString())
+        }
+
+        "P07" -> {
+            val respostaStrings = pergunta.respostas.map { it }
+            if (respostaStrings.isEmpty()) {
+                ShowAnswer.NotAnswered
+            } else {
+                ShowAnswer.ListStringAnswer(respostaStrings)
+            }
+        }
+
+        "P08" -> {
+            val respostaIndex = pergunta.respostas.getOrNull(0)?.toIntOrNull()
+            ShowAnswer.IntAnswer(respostaIndex)
+        }
+
+        else -> ShowAnswer.NotAnswered
+    }
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp)
+            .padding(bottom = 16.dp)
+            .verticalScroll(rememberScrollState()),
+        elevation = CardDefaults.cardElevation(4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color(173, 216, 230)
+        )
+    ) {
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(8.dp)
-                .padding(bottom = 16.dp)
-                .verticalScroll(rememberScrollState()),
-            elevation = CardDefaults.cardElevation(4.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = Color(255, 224, 192)
-            )
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             val picture = remember { mutableStateOf<String?>(pergunta.imagem) }
             if (picture.value != "" && showComplete) {
@@ -198,7 +198,7 @@ fun TipoPerguntaCard(
             }
         }
     }
-
+}
 @Composable
 fun PerguntaVF(
     pergunta: Pergunta,
@@ -825,144 +825,153 @@ fun PerguntaPalavras(
         navController: NavHostController,
         onPerguntaSelected: (Int) -> Unit
     ) {
-        val tiposPerguntas = listOf(
-            Pergunta(
-                id = "Q1",
-                idUtilizador = FirebaseAuth.getInstance().currentUser?.uid ?: "",
-                titulo = "A água ferve a 100°C?",
-                imagem = "http://amov.servehttp.com:11111/file/uploaded-1735618972183-file.jpg",
-                respostas = listOf(""),
-                respostaCerta = listOf("true"),
-                tipo = "P01"
+    val tiposPerguntas = listOf(
+        Pergunta(
+            id = "Q1",
+            idUtilizador = FirebaseAuth.getInstance().currentUser?.uid ?: "",
+            titulo = "A água ferve a 100°C?",
+            imagem = "http://amov.servehttp.com:11111/file/uploaded-1735618972183-file.jpg",
+            respostas = listOf(""),
+            respostaCerta = listOf("true"),
+            tipo = "P01"
+        ),
+        Pergunta(
+            id = "Q2",
+            idUtilizador = FirebaseAuth.getInstance().currentUser?.uid ?: "",
+            titulo = "Qual é a capital da França?",
+            imagem = "http://amov.servehttp.com:11111/file/uploaded-1735618972183-file.jpg",
+            respostas = listOf("Londres", "Berlim", "Paris", "Madrid"),
+            respostaCerta = listOf("2"),
+            tipo = "P02"
+        ),
+        Pergunta(
+            id = "Q3",
+            idUtilizador = FirebaseAuth.getInstance().currentUser?.uid ?: "",
+            titulo = "Selecione os continentes",
+            imagem = "http://amov.servehttp.com:11111/file/uploaded-1735618972183-file.jpg",
+            respostas = listOf("Ásia", "Europa", "Oceania", "Antártica", "Atlântico"),
+            respostaCerta = listOf("2", "3"),
+            tipo = "P03"
+        ),
+        Pergunta(
+            id = "Q3",
+            idUtilizador = FirebaseAuth.getInstance().currentUser?.uid ?: "",
+            titulo = "Selecione os continentes",
+            imagem = "http://amov.servehttp.com:11111/file/uploaded-1735618972183-file.jpg",
+            respostas = listOf("Ásia", "Europa", "Oceania", "Antártica", "Atlântico", "MAreica"),
+            respostaCerta = listOf(
+                "Ásia",
+                "Europa",
+                "Oceania",
+                "Antártica",
+                "Atlântico",
+                "MAreica"
             ),
-            Pergunta(
-                id = "Q2",
-                idUtilizador = FirebaseAuth.getInstance().currentUser?.uid ?: "",
-                titulo = "Qual é a capital da França?",
-                imagem = "http://amov.servehttp.com:11111/file/uploaded-1735618972183-file.jpg",
-                respostas = listOf("Londres", "Berlim", "Paris", "Madrid"),
-                respostaCerta = listOf("2"),
-                tipo = "P02"
+            tipo = "P04"
+        ),
+        Pergunta(
+            id = "Q3",
+            idUtilizador = FirebaseAuth.getInstance().currentUser?.uid ?: "",
+            titulo = "Selecione os continentes",
+            imagem = "http://amov.servehttp.com:11111/file/uploaded-1735618972183-file.jpg",
+            respostas = listOf("Ásia", "Europa", "Oceania", "Antártica"),
+            respostaCerta = listOf("Oceania", "Europa", "Antártica", "Ásia"),
+            tipo = "P05"
+        ),
+        Pergunta(
+            id = "Q3",
+            idUtilizador = FirebaseAuth.getInstance().currentUser?.uid ?: "",
+            titulo = "Selecione os continentes",
+            imagem = "http://amov.servehttp.com:11111/file/uploaded-1735618972183-file.jpg",
+            respostas = listOf("Estou na _ e vou para _ "),
+            respostaCerta = listOf("Ásia", "Europa"),
+            tipo = "P06"
+        ),
+        Pergunta(
+            id = "Q3",
+            idUtilizador = FirebaseAuth.getInstance().currentUser?.uid ?: "",
+            titulo = "Selecione os continentes",
+            imagem = "http://amov.servehttp.com:11111/file/uploaded-1735618972183-file.jpg",
+            respostas = listOf(
+                "http://amov.servehttp.com:11111/file/uploaded-1735618972183-file.jpg",
+                "2"
             ),
-            Pergunta(
-                id = "Q3",
-                idUtilizador = FirebaseAuth.getInstance().currentUser?.uid ?: "",
-                titulo = "Selecione os continentes",
-                imagem = "http://amov.servehttp.com:11111/file/uploaded-1735618972183-file.jpg",
-                respostas = listOf("Ásia", "Europa", "Oceania", "Antártica", "Atlântico"),
-                respostaCerta = listOf("2", "3"),
-                tipo = "P03"
-            ),
-            Pergunta(
-                id = "Q3",
-                idUtilizador = FirebaseAuth.getInstance().currentUser?.uid ?: "",
-                titulo = "Selecione os continentes",
-                imagem = "http://amov.servehttp.com:11111/file/uploaded-1735618972183-file.jpg",
-                respostas = listOf("Ásia", "Europa", "Oceania", "Antártica", "Atlântico","MAreica"),
-                respostaCerta = listOf("Ásia", "Europa", "Oceania", "Antártica", "Atlântico","MAreica"),
-                tipo = "P04"
-            ),
-            Pergunta(
-                id = "Q3",
-                idUtilizador = FirebaseAuth.getInstance().currentUser?.uid ?: "",
-                titulo = "Selecione os continentes",
-                imagem = "http://amov.servehttp.com:11111/file/uploaded-1735618972183-file.jpg",
-                respostas = listOf("Ásia", "Europa", "Oceania", "Antártica"),
-                respostaCerta = listOf(  "Oceania","Europa", "Antártica","Ásia"),
-                tipo = "P05"
-            ),
-            Pergunta(
-                id = "Q3",
-                idUtilizador = FirebaseAuth.getInstance().currentUser?.uid ?: "",
-                titulo = "Selecione os continentes",
-                imagem = "http://amov.servehttp.com:11111/file/uploaded-1735618972183-file.jpg",
-                respostas = listOf("Estou na _ e vou para _ "),
-                respostaCerta = listOf("Ásia", "Europa"),
-                tipo = "P06"
-            ),
-            Pergunta(
-                id = "Q3",
-                idUtilizador = FirebaseAuth.getInstance().currentUser?.uid ?: "",
-                titulo = "Selecione os continentes",
-                imagem = "http://amov.servehttp.com:11111/file/uploaded-1735618972183-file.jpg",
-                respostas = listOf("http://amov.servehttp.com:11111/file/uploaded-1735618972183-file.jpg","2"),
-                respostaCerta = listOf("Ásia", "Europa", "Oceania", "Antártica"),
-                tipo = "P07"
-            ),
-            Pergunta(
-                id = "Q3",
-                idUtilizador = FirebaseAuth.getInstance().currentUser?.uid ?: "",
-                titulo = "Selecione os continentes",
-                imagem = "http://amov.servehttp.com:11111/file/uploaded-1735618972183-file.jpg",
-                respostas = listOf("2"),
-                respostaCerta = listOf("Ásia", "Europa", "Oceania", "Antártica"),
-                tipo = "P08"
-            )
+            respostaCerta = listOf("Ásia", "Europa", "Oceania", "Antártica"),
+            tipo = "P07"
+        ),
+        Pergunta(
+            id = "Q3",
+            idUtilizador = FirebaseAuth.getInstance().currentUser?.uid ?: "",
+            titulo = "Selecione os continentes",
+            imagem = "http://amov.servehttp.com:11111/file/uploaded-1735618972183-file.jpg",
+            respostas = listOf("2"),
+            respostaCerta = listOf("Ásia", "Europa", "Oceania", "Antártica"),
+            tipo = "P08"
         )
+    )
 
-        var selectedPage by remember { mutableStateOf(-1) }
-
-        Box(
+    var selectedPage by remember { mutableStateOf(-1) }
+    BackgroundWithImage(
+        modifier = Modifier.fillMaxSize()
+    ) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        val pagerState = rememberPagerState(pageCount = {
+            tiposPerguntas.size
+        })
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxSize()
+        ) { page ->
+            val pergunta = tiposPerguntas[page]
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(4.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .padding(2.dp)
+            ) {
+                TipoPerguntaCard(
+                    pergunta, true
+                )
+            }
+        }
+        Button(
+            onClick = {
+                selectedPage = pagerState.currentPage
+                onPerguntaSelected(selectedPage)
+                navController.navigate("criar-pergunta") {
+                    popUpTo("criar-pergunta") { inclusive = true }
+                }
+            },
             modifier = Modifier
-                .fillMaxSize()
+                .align(Alignment.BottomCenter)
+                .padding(64.dp)
         ) {
-            val pagerState = rememberPagerState(pageCount = {
-                tiposPerguntas.size
-            })
-            HorizontalPager(
-                state = pagerState,
-                modifier = Modifier.fillMaxSize()
-            ) { page ->
-                val pergunta = tiposPerguntas[page]
+            Text("Escolher")
+        }
+
+        Row(
+            Modifier
+                .align(Alignment.BottomCenter)
+                .wrapContentHeight()
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            repeat(pagerState.pageCount) { iteration ->
+                val color =
+                    if (pagerState.currentPage == iteration) Color.DarkGray else Color.LightGray
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .padding(4.dp)
-                        .clip(RoundedCornerShape(16.dp))
                         .padding(2.dp)
-                ) {
-                    TipoPerguntaCard(
-                        pergunta, true
-                    )
-                }
-            }
-            Button(
-                onClick = {
-                    selectedPage = pagerState.currentPage
-                    onPerguntaSelected(selectedPage)
-                    navController.navigate("criar-pergunta") {
-                        popUpTo("criar-pergunta") { inclusive = true }
-                    }
-                },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(64.dp)
-            ) {
-                Text("Escolher")
-            }
-
-            Row(
-                Modifier
-                    .align(Alignment.BottomCenter)
-                    .wrapContentHeight()
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                repeat(pagerState.pageCount) { iteration ->
-                    val color =
-                        if (pagerState.currentPage == iteration) Color.DarkGray else Color.LightGray
-                    Box(
-                        modifier = Modifier
-                            .padding(2.dp)
-                            .clip(CircleShape)
-                            .background(color)
-                            .size(16.dp)
-                    )
-                }
+                        .clip(CircleShape)
+                        .background(color)
+                        .size(16.dp)
+                )
             }
         }
     }
-
-// TODO FINAL
-// P06, equacao
+}}

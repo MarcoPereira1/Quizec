@@ -2,6 +2,7 @@ package pt.isec.marco.quizec.utils
 
 
 import android.util.Log
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.ListenerRegistration
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
@@ -130,6 +131,7 @@ class FStorageUtil {
                     onResult(null, exception)
                 }
         }
+
         fun getQuestionarioByPartilhaId(
             id: String,
             onResult: (Questionario?, Throwable?) -> Unit
@@ -178,6 +180,7 @@ class FStorageUtil {
                     }
                 }
         }
+
         fun startPerguntasObserver(userId: String, onNewValues: (List<Pergunta>?, Throwable?) -> Unit) {
             stopObserver()
             val db = Firebase.firestore
@@ -200,6 +203,7 @@ class FStorageUtil {
                     }
                 }
         }
+
         suspend fun getQuestionarioByIdSuspend(id: String): Questionario? = suspendCoroutine { continuation ->
             getQuestionarioById(id) { questionario, _ ->
                 continuation.resume(questionario)
@@ -241,7 +245,7 @@ class FStorageUtil {
         }
 
         fun addPartilhaToFirestore(
-            onResult: (Throwable?) -> Unit,
+            onResult: (Throwable?, String?) -> Unit,
             partilha: Partilha,
             viewModel: FirebaseViewModel
         ) {
@@ -268,9 +272,9 @@ class FStorageUtil {
                             "addPartilhaToFirestore: Success? ${result.isSuccessful}"
                         )
                         if (result.isSuccessful) {
-                            onResult(null)
+                            onResult(null, partilha.id)
                         } else {
-                            onResult(result.exception)
+                            onResult(result.exception, null)
                         }
                     }
             }
@@ -288,7 +292,6 @@ class FStorageUtil {
 
             respostaList.forEachIndexed { index, resposta ->
                 val respostaDocRef = respostaCollectionRef.document("resposta_$index")
-
                 respostaDocRef.get()
                     .addOnSuccessListener { document ->
                         if (document.exists()) {
@@ -297,29 +300,44 @@ class FStorageUtil {
                             val respostas = hashMapOf(
                                 "respostas" to resposta
                             )
-
                             respostaDocRef.set(respostas)
-                                .addOnSuccessListener {
-                                    Log.d("Firestore", "Successfully added list to resposta_$index.")
-                                }
-                                .addOnFailureListener { e ->
-                                    Log.e("Firestore", "Erro ao adicionar resposta_$index", e)
-                                }
                         }
-                    }
-                    .addOnFailureListener { e ->
-                        Log.e("Firestore", "Erro ao verificar documento resposta_$index", e)
                     }
             }
         }
 
         private var listenerRegistration: ListenerRegistration? = null
 
-
         fun stopObserver() {
             listenerRegistration?.remove()
         }
 
+        fun getQuestionarioIdRespondidosByUser(
+            userId: String,
+            onResult: (List<String>) -> Unit,
+            onError: (Exception) -> Unit
+        ) {
+            val db = Firebase.firestore
+            db.collection("Partilhas")
+                .whereArrayContains("usersList", userId)
+                .get()
+                .addOnSuccessListener { querySnapshot ->
+                    val idQuestionarios = querySnapshot.documents.mapNotNull { document ->
+                        document.getString("idQuestionario")
+                    }
+                    onResult(idQuestionarios)
+                }
+                .addOnFailureListener { exception ->
+                    Log.e("firesotre", "Erro ao procurar partilhas: ${exception.message}", exception)
+                    onError(exception)
+                }
+        }
+
+        fun addUserToPartilha(partilhaId: String, userId: String, onSuccess: () -> Unit, onError: (Exception) -> Unit) {
+            val db = Firebase.firestore
+            val partilhaDocRef = db.collection("Partilhas").document("partilha_$partilhaId")
+            partilhaDocRef.update("usersList", FieldValue.arrayUnion(userId))
+        }
 
     }
 }

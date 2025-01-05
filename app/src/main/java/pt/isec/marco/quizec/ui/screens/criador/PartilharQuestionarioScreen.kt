@@ -15,7 +15,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -36,9 +35,9 @@ fun PartilharQuestionarioScreen(
     idQuestionario: String,
     navController: NavHostController
 ) {
-    var partilha by remember { mutableStateOf<Partilha?>(null) }
     var tempoEspera by remember { mutableStateOf(0L) }
     var duracao by remember { mutableStateOf(0L) }
+    val partilhaId by viewModel.partilhaId.collectAsState()
 
     Column(
         modifier = Modifier
@@ -113,7 +112,10 @@ fun PartilharQuestionarioScreen(
 
             LaunchedEffect(partilhaSuccess) {
                 if (partilhaSuccess) {
-                    Toast.makeText(context, "Partilha iniciada com sucesso!", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, "Partilha iniciada com sucesso!\nCodigo de partilha: $partilhaId", Toast.LENGTH_SHORT).show()
+                    navController.navigate("menu-criador") {
+                        popUpTo("menu-criador") { inclusive = true }
+                    }
                     viewModel.resetSuccessState()
                 }
             }

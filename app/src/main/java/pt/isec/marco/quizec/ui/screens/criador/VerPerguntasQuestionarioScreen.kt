@@ -1,6 +1,5 @@
 package pt.isec.marco.quizec.ui.screens.criador
 
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -8,8 +7,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -92,10 +89,31 @@ fun VerQuestionarioScreen(
                                     )
                                     .padding(16.dp)
                             ) {
-                                TipoPerguntaCard(
-                                    pergunta = pergunta,
-                                    showComplete = showComplete,
-                                )
+                                Column {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "Pergunta: ${pergunta.titulo}",
+                                            color = Color.Blue,
+                                            modifier = Modifier
+                                                .weight(1f)
+                                        )
+                                        Icon(
+                                            imageVector = Icons.Default.Add,
+                                            contentDescription = "Adiciona",
+                                            tint = Color.Blue,
+                                            modifier = Modifier
+                                                .clickable {
+
+                                                }
+                                        )
+                                    }
+                                    TipoPerguntaCard(
+                                        pergunta = pergunta,
+                                        showComplete = showComplete
+                                    )
+                                }
                             }
                         }
                     }

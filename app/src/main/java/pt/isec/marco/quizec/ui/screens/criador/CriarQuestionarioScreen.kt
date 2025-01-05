@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,10 +48,8 @@ fun CriarQuestionarioScreen(
 ) {
     var confirmaDialog by remember { mutableStateOf(false) }
     var mostraMsgSucesso by remember { mutableStateOf(false) }
-    var nomeQuestionario by remember { mutableStateOf("") } // Variável para armazenar o nome do questionário
-    var descricao by remember { mutableStateOf("") }
+    var nomeQuestionario by remember { mutableStateOf("") }
     var imageUrl by remember { mutableStateOf<String?>(null) }
-    var pergunta by remember { mutableStateOf<Pergunta?>(null) }
     val context = LocalContext.current
     var error by remember { mutableStateOf<String?>(null) }
     val picture = remember { mutableStateOf<String?>(null) }
@@ -88,24 +85,6 @@ fun CriarQuestionarioScreen(
                 Spacer(Modifier.height(32.dp))
                 AdicionaImagens(picture, context, imagePath)
                 Spacer(Modifier.height(16.dp))
-//                TextField(
-//                    value = descricao,
-//                    onValueChange = { newText ->
-//                        descricao = newText
-//                    },
-//                    label = { Text("Descrição:") },
-//                    colors = TextFieldDefaults.colors(
-//                        focusedContainerColor = Color.LightGray,
-//                        unfocusedContainerColor = Color.LightGray,
-//                        focusedIndicatorColor = Color.Blue,
-//                        unfocusedIndicatorColor = Color.Gray,
-//                        cursorColor = Color.Blue
-//                    ),
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//
-//                )
-//                Spacer(Modifier.height(16.dp))
                 Button(
                     onClick = {
                         navController.navigate("tipo-pergunta") {
@@ -267,7 +246,7 @@ fun GuardaQuestionario(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "Introduza uma descrição do questionario: ",
+                    text = "Introduza uma descrição ao questionario: ",
                     fontSize = 16.sp,
                     color = Color.Gray
                 )
@@ -279,11 +258,6 @@ fun GuardaQuestionario(
 
                     modifier = Modifier.fillMaxWidth()
                 )
-//                TextField(
-//                    value = nomeQuestionario,
-//                    onValueChange = { onNomeChange(it) },
-//                    placeholder = { Text("Escreve aqui...") }
-//                )
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
                     modifier = Modifier

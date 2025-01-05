@@ -69,11 +69,6 @@ fun EntrarQuestionarioScreen(
                             errorMessage = "Nenhuma partilha encontrada com este código."
                         }
                     }
-//                navController.navigate("responder-questionario"){
-//                    popUpTo("responder-questionario") {
-//                        inclusive = true
-//                    }
-//                }
                 }
             ) {
                 Text("Entrar")

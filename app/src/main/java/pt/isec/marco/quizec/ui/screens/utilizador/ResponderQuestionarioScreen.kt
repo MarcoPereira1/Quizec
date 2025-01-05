@@ -7,17 +7,17 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -33,7 +33,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
 import pt.isec.marco.quizec.ui.screens.BackgroundWithImage
@@ -44,6 +47,7 @@ import pt.isec.marco.quizec.ui.viewmodels.Partilha
 import pt.isec.marco.quizec.ui.viewmodels.Questionario
 import pt.isec.marco.quizec.ui.viewmodels.Pergunta
 import pt.isec.marco.quizec.utils.FStorageUtil
+import pt.isec.marco.quizec.utils.FStorageUtil.Companion.addUserToPartilha
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
@@ -74,6 +78,8 @@ fun ResponderQuestionarioScreen(
             }
         }
     }
+    val picture =
+        remember { mutableStateOf(questionario?.imagem) }
     if (!perguntas.isEmpty()) {
         val respostas = remember { mutableStateListOf<MutableList<String>>() }
 
@@ -107,29 +113,43 @@ fun ResponderQuestionarioScreen(
                                 Box(
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .padding(4.dp)
-                                        .clip(RoundedCornerShape(16.dp))
-                                        .padding(2.dp)
+                                        .padding(4.dp),
+                                    contentAlignment = Alignment.Center
                                 ) {
-                                    val picture =
-                                        remember { mutableStateOf(questionario?.imagem) }
                                     Card(
                                         modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(8.dp)
-                                            .padding(bottom = 16.dp)
-                                            .verticalScroll(rememberScrollState()),
+                                            .fillMaxWidth(0.8f)
+                                            .padding(8.dp),
                                         elevation = CardDefaults.cardElevation(4.dp),
                                         colors = CardDefaults.cardColors(
-                                            containerColor = Color(255, 224, 192)
+                                            containerColor = Color(135, 206, 250)
                                         )
                                     ) {
                                         Column(
-                                            verticalArrangement = Arrangement.Center
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            verticalArrangement = Arrangement.Center,
+                                            modifier = Modifier
+                                                .padding(16.dp)
+                                                .fillMaxWidth()
                                         ) {
-                                            questionario?.let { Text(it.id) }
+                                            questionario?.let {
+                                                Text(
+                                                    text = "Questionário",
+                                                    fontSize = 32.sp,
+                                                    fontWeight = FontWeight.Bold,
+                                                    textAlign = TextAlign.Center,
+                                                    color = Color.Black
+                                                )
+                                                Spacer(modifier = Modifier.height(16.dp))
+                                                Text(
+                                                    text = it.descricao,
+                                                    fontSize = 20.sp,
+                                                    textAlign = TextAlign.Center,
+                                                    color = Color.DarkGray
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.height(32.dp))
                                             MeteImagem(picture)
-                                            questionario?.let { Text(it.descricao) }
                                         }
                                     }
                                 }
@@ -151,6 +171,22 @@ fun ResponderQuestionarioScreen(
                                                 respostas,
                                                 FirebaseAuth.getInstance().currentUser?.uid ?: ""
                                             )
+
+                                            addUserToPartilha(
+                                                partilhaId = idPartilha,
+                                                userId = FirebaseAuth.getInstance().currentUser?.uid ?: "",
+                                                onSuccess = {
+                                                    Log.d("partilha","adicionada")
+                                                            },
+                                                onError = { exception ->
+                                                    Log.d("partilha","nao adicionada")
+                                                }
+                                            )
+                                            navController.navigate("menu-utilizador") {
+                                                popUpTo("menu-utilizador") {
+                                                    inclusive = true
+                                                }
+                                            }
                                         }
                                     ) {
                                         Text("Finalizar")
@@ -210,6 +246,43 @@ fun ResponderQuestionarioScreen(
                                 .size(16.dp)
                         )
                     }
+                }
+            }
+        }
+    }
+    else{
+        BackgroundWithImage(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.White),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    questionario?.let {
+                        Text(
+                            text = it.descricao,
+                            fontSize = 28.sp,
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                            color = Color.Black,
+                            modifier = Modifier.padding(horizontal = 16.dp)
+                        )
+                    }
+                    questionario?.let {
+                        Text(
+                            text = "Este questionario nao tem perguntas",
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color.Gray
+                        )
+                    }
+                    MeteImagem(picture)
                 }
             }
         }

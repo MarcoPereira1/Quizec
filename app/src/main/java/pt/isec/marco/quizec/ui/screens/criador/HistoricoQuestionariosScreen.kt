@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.rememberPagerState
-
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -108,7 +107,7 @@ fun HistoricoQuestionarioScreen(
                                 )
                             }"
                         )
-
+                        viewModel.stopObserver()
                     }
 
                 },
@@ -151,13 +150,11 @@ fun Card(
                     )
 
                     questionario.perguntas?.forEach { pergunta ->
-                        Text("Pergunta: ${pergunta.titulo}")
                         TipoPerguntaCard(
                             pergunta = pergunta,
                             showComplete = showComplete,
                         )
                     }
-
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             }
