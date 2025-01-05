@@ -285,28 +285,52 @@ class FStorageUtil {
             val db = Firebase.firestore
             val partilhaDocRef = db.collection("Partilhas").document("partilha_$idPartilha")
 
-            // Create or get the subcollection entry_$userId
             val respostaCollectionRef = partilhaDocRef.collection("entry_$userId")
 
-            // Loop through each entry in respostaList
-            respostaList.forEachIndexed { respostaIndex, list ->
-                // For each list, create a document under the subcollection
-                val respostaDocRef = respostaCollectionRef.document("resposta_$respostaIndex")
+            // Check if the subcollection (entry_$userId) has any documents
+            respostaCollectionRef.get()
+                .addOnSuccessListener { querySnapshot ->
+                    if (!querySnapshot.isEmpty) {
+                        // If there are documents in the subcollection
+                        Log.d("Firestore", "Documents found in entry_$userId")
 
-                // Save the entire list as a field inside the document
-                val respostas = hashMapOf(
-                    "respostas" to  respostaList[respostaIndex]
-                )
+                        // Proceed with adding/updating documents in the collection
+                        for(i in 0 until respostaList.size){
+                            val respostaDocRef = respostaCollectionRef.document("resposta_teste")
 
-                // Set the data in the document
-                respostaDocRef.set(respostas)
-                    .addOnSuccessListener {
-                        Log.d("Firestore", "Successfully added list to resposta_$respostaIndex.")
+                            // First, check if the document already exists
+                            respostaDocRef.get()
+                                .addOnSuccessListener { document ->
+                                    // If the document does not exist, set the new data
+                                    val respostas = hashMapOf(
+                                        "respostas" to respostaList[i]
+                                    )
+
+                                    respostaDocRef.set(respostas)
+                                        .addOnSuccessListener {
+                                            Log.d("Firestore", "Successfully added list to resposta_$i.")
+                                        }
+                                        .addOnFailureListener { e ->
+                                            Log.d("Firestore", "Error adding list to resposta_$i", e)
+                                        }
+                                }
+                                .addOnFailureListener { e ->
+                                    Log.d("Firestore", "Error checking document resposta_$i", e)
+                                }
+                        }
+
+
+                        respostaList.forEachIndexed { respostaIndex, list ->
+
+                        }
+                    } else {
+                        // If the subcollection is empty (no documents)
+                        Log.d("Firestore", "No documents found in entry_$userId")
                     }
-                    .addOnFailureListener { e ->
-                        Log.e("Firestore", "Error adding list to resposta_$respostaIndex", e)
-                    }
-            }
+                }
+                .addOnFailureListener { e ->
+                    Log.d("Firestore", "Error checking entry_$userId collection", e)
+                }
         }
 
 

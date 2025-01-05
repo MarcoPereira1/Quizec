@@ -53,6 +53,7 @@ fun ResponderQuestionarioScreen(
     tempoEspera: Int
 
 ) {
+    Log.d("ResponderQuestionarioScreen", "idPartilha: $idPartilha")
     var questionario by remember { mutableStateOf<Questionario?>(null) }
     var perguntas by remember { mutableStateOf<List<Pergunta>>(emptyList()) }
     var partilha by remember { mutableStateOf<Partilha?>(null) }
@@ -67,7 +68,7 @@ fun ResponderQuestionarioScreen(
         }
         FStorageUtil.getPartilhaById(idPartilha) { partilhaaux, error ->
             if (error != null) {
-            } else if (partilha != null) {
+            } else if (partilhaaux != null) {
                 partilha = partilhaaux
             }
         }
@@ -81,15 +82,19 @@ fun ResponderQuestionarioScreen(
         val pagerState = rememberPagerState(pageCount = {
             perguntas.size + 2
         })
-        Log.d("size state", "${pagerState.pageCount}")
         Box(
             modifier = Modifier
                 .fillMaxSize()
         ) {
-            if (partilha != null) {
-                if (partilha!!.tempoEspera > 0) {
+            Log.d("ResponderQuestionarioScreen", "idPartilha: $partilha")
+            if (true) {
+                if (
+                    false
+//                    partilha!!.tempoEspera > 0
+                    ) {
                     mostraTempoEspera(partilha!!)
                 } else {
+                    Log.d("PagerState", "Current page: ${pagerState.currentPage}")
                     HorizontalPager(
                         state = pagerState,
                         modifier = Modifier.fillMaxSize()
@@ -103,7 +108,7 @@ fun ResponderQuestionarioScreen(
                                     .padding(2.dp)
                             ) {
                                 val picture =
-                                    remember { mutableStateOf<String?>(questionario?.imagem) }
+                                    remember { mutableStateOf(questionario?.imagem) }
                                 Card(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -134,6 +139,7 @@ fun ResponderQuestionarioScreen(
                                     .padding(2.dp)
                             ) {
                                 val message by remember { mutableStateOf("") }
+
                                 Button(
                                     onClick = {
                                         FStorageUtil.addRespostasToPartilha(
