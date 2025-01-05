@@ -130,11 +130,33 @@ class FStorageUtil {
                     onResult(null, exception)
                 }
         }
-
-        fun startQuestionariosObserver(
-            userId: String,
-            onNewValues: (List<Questionario>?, Throwable?) -> Unit
+        fun getQuestionarioByPartilhaId(
+            id: String,
+            onResult: (Questionario?, Throwable?) -> Unit
         ) {
+            val db = Firebase.firestore
+            val docRef = db.collection("Partilhas").document("partilha_$id")
+
+            docRef
+                .get()
+                .addOnSuccessListener { document ->
+                    if (document.exists()) {
+                        val idQuestionario = document.getString("idQuestionario")
+                        if (idQuestionario != null) {
+                            getQuestionarioById(idQuestionario, onResult)
+                        } else {
+                            onResult(null, Throwable("idQuestionario not found in Partilha document"))
+                        }
+                    } else {
+                        onResult(null, Throwable("Partilha not found with id: $id"))
+                    }
+                }
+                .addOnFailureListener { exception ->
+                    onResult(null, exception)
+                }
+        }
+
+        fun startQuestionariosObserver(userId: String, onNewValues: (List<Questionario>?, Throwable?) -> Unit) {
             stopObserver()
             val db = Firebase.firestore
             listenerRegistration = db.collection("Questionarios")
@@ -152,18 +174,11 @@ class FStorageUtil {
                         Log.i("Firestore", "$questionarios")
                         onNewValues(questionarios, null) // Passa a lista filtrada para o callback
                     } else {
-                        onNewValues(
-                            emptyList(),
-                            null
-                        ) // Retorna uma lista vazia se não houver documentos
+                        onNewValues(emptyList(), null) // Retorna uma lista vazia se não houver documentos
                     }
                 }
         }
-
-        fun startPerguntasObserver(
-            userId: String,
-            onNewValues: (List<Pergunta>?, Throwable?) -> Unit
-        ) {
+        fun startPerguntasObserver(userId: String, onNewValues: (List<Pergunta>?, Throwable?) -> Unit) {
             stopObserver()
             val db = Firebase.firestore
             listenerRegistration = db.collection("Perguntas")
@@ -185,26 +200,19 @@ class FStorageUtil {
                     }
                 }
         }
-
-        suspend fun getQuestionarioByIdSuspend(id: String): Questionario? =
-            suspendCoroutine { continuation ->
-                getQuestionarioById(id) { questionario, _ ->
-                    continuation.resume(questionario)
-                }
+        suspend fun getQuestionarioByIdSuspend(id: String): Questionario? = suspendCoroutine { continuation ->
+            getQuestionarioById(id) { questionario, _ ->
+                continuation.resume(questionario)
             }
+        }
 
-        suspend fun getPerguntaByIdSuspend(id: String): Pergunta? =
-            suspendCoroutine { continuation ->
-                getPerguntaById(id) { pergunta, _ ->
-                    continuation.resume(pergunta)
-                }
+        suspend fun getPerguntaByIdSuspend(id: String): Pergunta? = suspendCoroutine { continuation ->
+            getPerguntaById(id) { pergunta, _ ->
+                continuation.resume(pergunta)
             }
+        }
 
-        fun addQuestionarioToFirestore(
-            onResult: (Throwable?) -> Unit,
-            questionario: Questionario,
-            viewModel: FirebaseViewModel
-        ) {
+        fun addQuestionarioToFirestore(onResult: (Throwable?) -> Unit, questionario: Questionario, viewModel: FirebaseViewModel) {
             val db = Firebase.firestore
 
             geraUnico { uniqueId ->

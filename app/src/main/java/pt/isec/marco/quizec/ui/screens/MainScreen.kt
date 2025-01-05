@@ -266,22 +266,27 @@ fun MainScreen(
                         EntrarQuestionarioScreen(
                             viewModel = viewModel,
                             navController = navController,
-                            codigoPartilha = codigoPartilha
                         )
                     }
                 }
-                composable(route = "responder-questionario") {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color(108, 147, 201, 255))
-                    ) {
-                        ResponderQuestionarioScreen(
-                            viewModel = viewModel,
-                            navController = navController
-                        )
-                    }
+                composable(
+                    route = "responder-questionario/{idPartilha}/{tempoEspera}",
+                    arguments = listOf(
+                        navArgument("idPartilha") { type = NavType.StringType },
+                        navArgument("tempoEspera") { type = NavType.StringType }
+                    )
+                ) {
+                    val idPartilha = it.arguments?.getString("idPartilha") ?: ""
+                    val tempoEspera = it.arguments?.getString("tempoEspera") ?: ""
+
+                    ResponderQuestionarioScreen(
+                        viewModel = viewModel,
+                        navController = navController,
+                        idPartilha = idPartilha,
+                        tempoEspera = 0
+                    )
                 }
+
 
                 composable(route = "seleciona-perguntas") {
                     Box(

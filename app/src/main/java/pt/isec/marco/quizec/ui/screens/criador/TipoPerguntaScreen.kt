@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.google.firebase.auth.FirebaseAuth
 import pt.isec.marco.quizec.R
+import pt.isec.marco.quizec.ui.screens.BackgroundWithImage
 import pt.isec.marco.quizec.ui.viewmodels.Pergunta
 
 sealed class ShowAnswer {
@@ -68,124 +69,135 @@ fun TipoPerguntaCard(
     resposta: MutableList<String>?=null,
 ) {
     var answer by remember { mutableStateOf<ShowAnswer?>(null) }
-
-    answer = when (pergunta.tipo) {
-        "P01" -> {
-            when (pergunta.respostaCerta.getOrNull(0)) {
-                "true" -> ShowAnswer.BooleanAnswer(true)
-                "false" -> ShowAnswer.BooleanAnswer(false)
-                else -> ShowAnswer.NotAnswered
-            }
-        }
-        "P02" -> {
-            val respostaIndex = pergunta.respostaCerta.getOrNull(0)?.toIntOrNull()
-            if(respostaIndex == null){
-                ShowAnswer.NotAnswered
-            }else{
-                ShowAnswer.IntAnswer(respostaIndex)
-            }
-        }
-        "P03"  -> {
-            val respostaIndex = pergunta.respostaCerta.mapNotNull { it.toIntOrNull() }
-            if(respostaIndex.isEmpty()){
-                ShowAnswer.NotAnswered
-            }else{
-                ShowAnswer.ListAnswer(respostaIndex)
-            }
-        }
-        "P04" -> {
-            if(pergunta.respostaCerta.isEmpty()){
-                ShowAnswer.NotAnswered
-            }else{
-                val respostaIndex = List(pergunta.respostas.size/2) {-1}.toMutableList()
-                for(i in 0 until pergunta.respostaCerta.size/2){
-                    val index = pergunta.respostaCerta.indexOf(pergunta.respostas[i])
-                    val index2 = pergunta.respostas.indexOf(pergunta.respostaCerta[index+pergunta.respostas.size/2])
-                    respostaIndex[i] = index2 - pergunta.respostas.size/2 + 1
+    BackgroundWithImage(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        answer = when (pergunta.tipo) {
+            "P01" -> {
+                when (pergunta.respostaCerta.getOrNull(0)) {
+                    "true" -> ShowAnswer.BooleanAnswer(true)
+                    "false" -> ShowAnswer.BooleanAnswer(false)
+                    else -> ShowAnswer.NotAnswered
                 }
-                ShowAnswer.ListAnswer(respostaIndex)
             }
 
-        }
-        "P05" -> {
-            if(pergunta.respostaCerta.isEmpty()){
-                ShowAnswer.NotAnswered
-            }else {
-                val respostaIndex = List(pergunta.respostas.size) { -1 }.toMutableList()
-                for (i in 0 until pergunta.respostaCerta.size) {
-                    val index = pergunta.respostaCerta.indexOf(pergunta.respostas[i])
-                    respostaIndex[index] = i + 1
+            "P02" -> {
+                val respostaIndex = pergunta.respostaCerta.getOrNull(0)?.toIntOrNull()
+                if (respostaIndex == null) {
+                    ShowAnswer.NotAnswered
+                } else {
+                    ShowAnswer.IntAnswer(respostaIndex)
                 }
-                ShowAnswer.ListAnswer(respostaIndex)
             }
-        }
-        "P06" -> {
-            val frase = pergunta.respostas.getOrNull(0)
-            var i = 1
-            val result = StringBuilder()
 
-            var j = 0
+            "P03" -> {
+                val respostaIndex = pergunta.respostaCerta.mapNotNull { it.toIntOrNull() }
+                if (respostaIndex.isEmpty()) {
+                    ShowAnswer.NotAnswered
+                } else {
+                    ShowAnswer.ListAnswer(respostaIndex)
+                }
+            }
 
-            if (frase != null) {
-                for (char in frase) {
-                    if (char == '_' && j < pergunta.respostaCerta.size) {
-                        result.append("[$i. \"${pergunta.respostaCerta[j]}\"]")
-                        i++
-                        j++
-                    } else {
+            "P04" -> {
+                if (pergunta.respostaCerta.isEmpty()) {
+                    ShowAnswer.NotAnswered
+                } else {
+                    val respostaIndex = List(pergunta.respostas.size / 2) { -1 }.toMutableList()
+                    for (i in 0 until pergunta.respostaCerta.size / 2) {
+                        val index = pergunta.respostaCerta.indexOf(pergunta.respostas[i])
+                        val index2 =
+                            pergunta.respostas.indexOf(pergunta.respostaCerta[index + pergunta.respostas.size / 2])
+                        respostaIndex[i] = index2 - pergunta.respostas.size / 2 + 1
+                    }
+                    ShowAnswer.ListAnswer(respostaIndex)
+                }
 
-                        result.append(char)
+            }
+
+            "P05" -> {
+                if (pergunta.respostaCerta.isEmpty()) {
+                    ShowAnswer.NotAnswered
+                } else {
+                    val respostaIndex = List(pergunta.respostas.size) { -1 }.toMutableList()
+                    for (i in 0 until pergunta.respostaCerta.size) {
+                        val index = pergunta.respostaCerta.indexOf(pergunta.respostas[i])
+                        respostaIndex[index] = i + 1
+                    }
+                    ShowAnswer.ListAnswer(respostaIndex)
+                }
+            }
+
+            "P06" -> {
+                val frase = pergunta.respostas.getOrNull(0)
+                var i = 1
+                val result = StringBuilder()
+
+                var j = 0
+
+                if (frase != null) {
+                    for (char in frase) {
+                        if (char == '_' && j < pergunta.respostaCerta.size) {
+                            result.append("[$i. \"${pergunta.respostaCerta[j]}\"]")
+                            i++
+                            j++
+                        } else {
+
+                            result.append(char)
+                        }
                     }
                 }
+                ShowAnswer.StringAnswer(result.toString())
             }
-            ShowAnswer.StringAnswer(result.toString())
-        }
-        "P07" -> {
-            val respostaStrings = pergunta.respostas.map { it }
-            if(respostaStrings.isEmpty()){
-                ShowAnswer.NotAnswered
-            }else{
-                ShowAnswer.ListStringAnswer(respostaStrings)
-            }
-        }
-        "P08" -> {
-            val respostaIndex = pergunta.respostas.getOrNull(0)?.toIntOrNull()
-            ShowAnswer.IntAnswer(respostaIndex)
-        }
 
-        else -> ShowAnswer.NotAnswered
-    }
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-            .padding(bottom = 16.dp)
-            .verticalScroll(rememberScrollState()),
-        elevation = CardDefaults.cardElevation(4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color(255,224,192)
-        )
-    ) {
-        val picture = remember { mutableStateOf<String?>(pergunta.imagem) }
-        if(picture.value != "" && showComplete){
-            Box(
-                modifier = Modifier.fillMaxWidth(),
-                contentAlignment = Alignment.Center
-            ) {
-                MeteImagem(picture)
+            "P07" -> {
+                val respostaStrings = pergunta.respostas.map { it }
+                if (respostaStrings.isEmpty()) {
+                    ShowAnswer.NotAnswered
+                } else {
+                    ShowAnswer.ListStringAnswer(respostaStrings)
+                }
             }
+
+            "P08" -> {
+                val respostaIndex = pergunta.respostas.getOrNull(0)?.toIntOrNull()
+                ShowAnswer.IntAnswer(respostaIndex)
+            }
+
+            else -> ShowAnswer.NotAnswered
         }
-        when(pergunta.tipo){
-            "P01" -> PerguntaVF(pergunta, showComplete,answer,resposta)
-            "P02" -> PerguntaEM(pergunta, showComplete,answer,false,resposta)
-            "P03" -> PerguntaEM(pergunta, showComplete,answer,true,resposta)
-            "P04" -> PerguntaCorrespondecia(pergunta,showComplete,answer,resposta)
-            "P05" -> PerguntaOrdenacao(pergunta,showComplete,answer,resposta)
-            "P06" -> PerguntaEspacosEmBranco(pergunta,showComplete,answer,resposta)
-            "P07" -> PerguntaAssociacao(pergunta,showComplete,answer,resposta)
-            "P08" -> PerguntaPalavras(pergunta,showComplete,answer,resposta)
-            else -> {
-                Text("Tipo de pergunta desconhecido")
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+                .padding(bottom = 16.dp)
+                .verticalScroll(rememberScrollState()),
+            elevation = CardDefaults.cardElevation(4.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color(255, 224, 192)
+            )
+        ) {
+            val picture = remember { mutableStateOf<String?>(pergunta.imagem) }
+            if (picture.value != "" && showComplete) {
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    MeteImagem(picture)
+                }
+            }
+            when (pergunta.tipo) {
+                "P01" -> PerguntaVF(pergunta, showComplete, answer, resposta)
+                "P02" -> PerguntaEM(pergunta, showComplete, answer, false, resposta)
+                "P03" -> PerguntaEM(pergunta, showComplete, answer, true, resposta)
+                "P04" -> PerguntaCorrespondecia(pergunta, showComplete, answer, resposta)
+                "P05" -> PerguntaOrdenacao(pergunta, showComplete, answer, resposta)
+                "P06" -> PerguntaEspacosEmBranco(pergunta, showComplete, answer, resposta)
+                "P07" -> PerguntaAssociacao(pergunta, showComplete, answer, resposta)
+                "P08" -> PerguntaPalavras(pergunta, showComplete, answer, resposta)
+                else -> {
+                    Text("Tipo de pergunta desconhecido")
+                }
             }
         }
     }
@@ -377,6 +389,7 @@ fun PerguntaCorrespondecia(
         Text(stringResource(R.string.P04_name))
         Spacer(modifier = Modifier.height(16.dp))
     }
+
     Text("Pergunta: ${pergunta.titulo}")
     Spacer(modifier = Modifier.height(16.dp))
     var heigth by remember { mutableStateOf(58.dp) }

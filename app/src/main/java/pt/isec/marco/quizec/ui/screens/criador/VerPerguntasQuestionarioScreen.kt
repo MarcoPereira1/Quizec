@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import pt.isec.marco.quizec.ui.screens.BackgroundWithImage
 import pt.isec.marco.quizec.ui.viewmodels.FirebaseViewModel
 import pt.isec.marco.quizec.ui.viewmodels.Pergunta
 import pt.isec.marco.quizec.utils.FStorageUtil
@@ -48,67 +49,71 @@ fun VerQuestionarioScreen(
         perguntasIds.forEach { perguntaId ->
             FStorageUtil.getPerguntaById(perguntaId) { pergunta, _ ->
                 if (pergunta != null) {
+
                     perguntas = perguntas + pergunta
                 }
             }
         }
     }
-
-    if (perguntaSelecionada != null) {
-        TipoPerguntaCard(
-            pergunta = perguntaSelecionada!!,
-            showComplete = true
-        )
-    } else if (perguntas.isEmpty()) {
-        Text("Nenhuma pergunta disponível")
-    } else {
-        Box(modifier = Modifier.fillMaxSize()) {
-            Column (
-                modifier = Modifier.fillMaxSize()
-            ) {
-                perguntas.forEach { pergunta ->
-                    Box(
-                        modifier = Modifier
-                            .shadow(4.dp)
-                            .clickable {
-                                perguntaSelecionada = pergunta
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
+    BackgroundWithImage(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        if (perguntaSelecionada != null) {
+            TipoPerguntaCard(
+                pergunta = perguntaSelecionada!!,
+                showComplete = true
+            )
+        } else if (perguntas.isEmpty()) {
+            Text("Nenhuma pergunta disponível")
+        } else {
+            Box(modifier = Modifier.fillMaxSize()) {
+                Column(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    perguntas.forEach { pergunta ->
                         Box(
                             modifier = Modifier
-                                .padding(8.dp)
-                                .shadow(
-                                    4.dp,
-                                    shape = RoundedCornerShape(8.dp)
-                                )
-                                .background(
-                                    Color.LightGray,
-                                    shape = RoundedCornerShape(8.dp)
-                                )
-                                .padding(16.dp)
+                                .shadow(4.dp)
+                                .clickable {
+                                    perguntaSelecionada = pergunta
+                                },
+                            contentAlignment = Alignment.Center
                         ) {
-                            TipoPerguntaCard(
-                                pergunta = pergunta,
-                                showComplete = showComplete,
-                            )
+                            Box(
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .shadow(
+                                        4.dp,
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
+                                    .background(
+                                        Color.LightGray,
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
+                                    .padding(16.dp)
+                            ) {
+                                TipoPerguntaCard(
+                                    pergunta = pergunta,
+                                    showComplete = showComplete,
+                                )
+                            }
                         }
                     }
                 }
-            }
-            Button(
-                onClick = {
-                    navController.navigate("criar-questionario") {
-                        popUpTo("criar-questionario") {
-                            inclusive = true
+                Button(
+                    onClick = {
+                        navController.navigate("criar-questionario") {
+                            popUpTo("criar-questionario") {
+                                inclusive = true
+                            }
                         }
-                    }
-                },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(16.dp)
-            ) {
-                Text("Voltar")
+                    },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp)
+                ) {
+                    Text("Voltar")
+                }
             }
         }
     }

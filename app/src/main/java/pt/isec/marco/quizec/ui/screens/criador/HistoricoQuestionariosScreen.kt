@@ -129,37 +129,41 @@ fun Card(
     showComplete: Boolean
 ) {
     if (questionario != null) {
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            elevation = CardDefaults.cardElevation(8.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(255, 224, 192))
+        BackgroundWithImage(
+            modifier = Modifier.fillMaxSize()
         ) {
-            Column(
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp)
+                    .padding(16.dp),
+                elevation = CardDefaults.cardElevation(8.dp),
+                colors = CardDefaults.cardColors(containerColor = Color(255, 224, 192))
             ) {
-                Text(
-                    text = "Título do Questionário: ${questionario.descricao}",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold
-                )
-
-                questionario.perguntas?.forEach { pergunta ->
-                    Text("Pergunta: ${pergunta.titulo}")
-                    TipoPerguntaCard(
-                        pergunta = pergunta,
-                        showComplete = showComplete,
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Text(
+                        text = "Título do Questionário: ${questionario.descricao}",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold
                     )
-                }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                    questionario.perguntas?.forEach { pergunta ->
+                        Text("Pergunta: ${pergunta.titulo}")
+                        TipoPerguntaCard(
+                            pergunta = pergunta,
+                            showComplete = showComplete,
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
             }
         }
-    } else {
-        Text("Nenhum questionário disponível")
+        } else {
+            Text("Nenhum questionário disponível")
+        }
     }
-}
 

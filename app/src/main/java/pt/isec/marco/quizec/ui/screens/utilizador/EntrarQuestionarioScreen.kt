@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import pt.isec.marco.quizec.ui.screens.BackgroundWithImage
 import pt.isec.marco.quizec.ui.viewmodels.FirebaseViewModel
 import pt.isec.marco.quizec.ui.viewmodels.Partilha
 import pt.isec.marco.quizec.utils.FStorageUtil
@@ -24,53 +25,59 @@ import pt.isec.marco.quizec.utils.FStorageUtil
 @Composable
 fun EntrarQuestionarioScreen(
     viewModel: FirebaseViewModel,
-    navController: NavHostController,
-    codigoPartilha: String,
+    navController: NavHostController
     ) {
     var partilha by remember { mutableStateOf<Partilha?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var userInput by remember { mutableStateOf("") }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+    BackgroundWithImage(
+        modifier = Modifier.fillMaxSize()
     ) {
-
-        Column {
-            TextField(
-                value = userInput,
-                onValueChange = { newText ->
-                    userInput = newText
-                },
-                label = { Text("Introduz codigo questionario") },
-                placeholder = { Text("Escreve aqui...") }
-            )
-            Text(errorMessage ?: "")
-        }
-        Button(
-            onClick = {
-                errorMessage = null
-                // TODO verificar se o codigo é valido
-                FStorageUtil.getPartilhaById(userInput) { result, error ->
-                    if (error != null) {
-                        errorMessage = "Erro ao obter partilha: ${error.message}"
-                    } else if (result != null) {
-                        partilha = result
-                    } else {
-                        errorMessage = "Nenhuma partilha encontrada com este código."
-                    }
-                }
-                navController.navigate("responder-questionario"){
-                    popUpTo("responder-questionario") {
-                        inclusive = true
-                    }
-                }
-            }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Text("Entrar")
+
+            Column {
+                TextField(
+                    value = userInput,
+                    onValueChange = { newText ->
+                        userInput = newText
+                    },
+                    label = { Text("Introduz codigo questionario") },
+                    placeholder = { Text("Escreve aqui...") }
+                )
+                Text(errorMessage ?: "")
+            }
+            Button(
+                onClick = {
+                    errorMessage = null
+                    // TODO verificar se o codigo é valido
+                    FStorageUtil.getPartilhaById(userInput) { result, error ->
+                        if (error != null) {
+                            errorMessage = "Erro ao obter partilha: ${error.message}"
+                        } else if (result != null) {
+                            partilha = result
+                            val tempoEspera = "60" // Exemplo de valor
+                            navController.navigate(
+                                "responder-questionario/${userInput}/$tempoEspera"
+                            )
+                        } else {
+                            errorMessage = "Nenhuma partilha encontrada com este código."
+                        }
+                    }
+//                navController.navigate("responder-questionario"){
+//                    popUpTo("responder-questionario") {
+//                        inclusive = true
+//                    }
+//                }
+                }
+            ) {
+                Text("Entrar")
+            }
         }
     }
 }
