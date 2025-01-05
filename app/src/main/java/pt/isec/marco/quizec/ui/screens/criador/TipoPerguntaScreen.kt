@@ -69,9 +69,6 @@ fun TipoPerguntaCard(
     resposta: MutableList<String>?=null,
 ) {
     var answer by remember { mutableStateOf<ShowAnswer?>(null) }
-    BackgroundWithImage(
-        modifier = Modifier.fillMaxSize()
-    ) {
         answer = when (pergunta.tipo) {
             "P01" -> {
                 when (pergunta.respostaCerta.getOrNull(0)) {
@@ -201,7 +198,6 @@ fun TipoPerguntaCard(
             }
         }
     }
-}
 
 @Composable
 fun PerguntaVF(

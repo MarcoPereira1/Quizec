@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import pt.isec.marco.quizec.ui.screens.BackgroundWithImage
 import pt.isec.marco.quizec.ui.viewmodels.FirebaseViewModel
 
 @Composable
@@ -41,113 +42,116 @@ fun SelecionarPerguntasScreen(
     LaunchedEffect(Unit) {
         viewModel.startPerguntasObserver()
     }
-
-    if (perguntas.isEmpty()) {
-        Text("Nenhuma pergunta disponível")
-    } else {
-        Box(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Column (
+    BackgroundWithImage(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        if (perguntas.isEmpty()) {
+            Text("Nenhuma pergunta disponível")
+        } else {
+            Box(
                 modifier = Modifier.fillMaxSize()
             ) {
-                perguntas.forEach { pergunta ->
-                    var isSelected by remember { mutableStateOf(false) }
-                    var wasSelected by remember { mutableStateOf(false) }
+                Column(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    perguntas.forEach { pergunta ->
+                        var isSelected by remember { mutableStateOf(false) }
+                        var wasSelected by remember { mutableStateOf(false) }
 
-                    if (viewModel.perguntas.value.contains(pergunta.id)) {
-                        isSelected = false
-                        wasSelected = true
-                    }
-                    val backgroundColor =
-                        if (isSelected) Color.Green
-                        else if(wasSelected) Color.Magenta
-                        else Color(108, 147, 201, 255)
+                        if (viewModel.perguntas.value.contains(pergunta.id)) {
+                            isSelected = false
+                            wasSelected = true
+                        }
+                        val backgroundColor =
+                            if (isSelected) Color.Green
+                            else if (wasSelected) Color.Magenta
+                            else Color(108, 147, 201, 255)
 
-                    Box(
-                        modifier = Modifier
-                            .shadow(4.dp)
-                            .background(backgroundColor)
-                            .clickable {
-                                isSelected = !isSelected
-                                if (isSelected && !viewModel.perguntas.value.contains(pergunta.id)) {
-                                    Log.d(
-                                        "SelecionarPerguntasScreen",
-                                        "Adicionou pergunta ${pergunta.id}"
-                                    )
-                                    perguntasaux += pergunta.id
-                                    Log.d(
-                                        "SelecionarPerguntasScreen",
-                                        "Adicionou pergunta ${perguntasaux.size}"
-                                    )
-                                }
-                                if (!isSelected) {
-                                    Log.d(
-                                        "SelecionarPerguntasScreen",
-                                        "Removeu pergunta ${pergunta.id}"
-                                    )
-                                    perguntasaux -= pergunta.id
-                                }
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
                         Box(
                             modifier = Modifier
-                                .padding(8.dp)
-                                .shadow(
-                                    4.dp,
-                                    shape = RoundedCornerShape(8.dp)
-                                )
-                                .background(
-                                    Color.LightGray,
-                                    shape = RoundedCornerShape(8.dp)
-                                )
-                                .padding(16.dp)
+                                .shadow(4.dp)
+                                .background(backgroundColor)
+                                .clickable {
+                                    isSelected = !isSelected
+                                    if (isSelected && !viewModel.perguntas.value.contains(pergunta.id)) {
+                                        Log.d(
+                                            "SelecionarPerguntasScreen",
+                                            "Adicionou pergunta ${pergunta.id}"
+                                        )
+                                        perguntasaux += pergunta.id
+                                        Log.d(
+                                            "SelecionarPerguntasScreen",
+                                            "Adicionou pergunta ${perguntasaux.size}"
+                                        )
+                                    }
+                                    if (!isSelected) {
+                                        Log.d(
+                                            "SelecionarPerguntasScreen",
+                                            "Removeu pergunta ${pergunta.id}"
+                                        )
+                                        perguntasaux -= pergunta.id
+                                    }
+                                },
+                            contentAlignment = Alignment.Center
                         ) {
-                            Column {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = "Pergunta: ${pergunta.titulo}",
-                                        color = Color.Blue,
-                                        modifier = Modifier
-                                            .weight(1f)
+                            Box(
+                                modifier = Modifier
+                                    .padding(8.dp)
+                                    .shadow(
+                                        4.dp,
+                                        shape = RoundedCornerShape(8.dp)
                                     )
-                                    Icon(
-                                        imageVector = Icons.Default.Add,
-                                        contentDescription = "Seta para frente",
-                                        tint = Color.Blue,
-                                        modifier = Modifier
-                                            .clickable {
+                                    .background(
+                                        Color.LightGray,
+                                        shape = RoundedCornerShape(8.dp)
+                                    )
+                                    .padding(16.dp)
+                            ) {
+                                Column {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Text(
+                                            text = "Pergunta: ${pergunta.titulo}",
+                                            color = Color.Blue,
+                                            modifier = Modifier
+                                                .weight(1f)
+                                        )
+                                        Icon(
+                                            imageVector = Icons.Default.Add,
+                                            contentDescription = "Seta para frente",
+                                            tint = Color.Blue,
+                                            modifier = Modifier
+                                                .clickable {
 
-                                            }
+                                                }
+                                        )
+                                    }
+                                    TipoPerguntaCard(
+                                        pergunta = pergunta,
+                                        showComplete = showComplete
                                     )
                                 }
-                                TipoPerguntaCard(
-                                    pergunta = pergunta,
-                                    showComplete = showComplete
-                                )
                             }
                         }
                     }
                 }
-            }
-            Button(
-                onClick = {
-                    viewModel.perguntas.value += perguntasaux
-                    navController.navigate("criar-questionario") {
-                        popUpTo("criar-questionario") {
-                            inclusive = true
+                Button(
+                    onClick = {
+                        viewModel.perguntas.value += perguntasaux
+                        navController.navigate("criar-questionario") {
+                            popUpTo("criar-questionario") {
+                                inclusive = true
+                            }
                         }
-                    }
 
-                },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(16.dp)
-            ) {
-                Text("Adicionar perguntas")
+                    },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(16.dp)
+                ) {
+                    Text("Adicionar perguntas")
+                }
             }
         }
     }

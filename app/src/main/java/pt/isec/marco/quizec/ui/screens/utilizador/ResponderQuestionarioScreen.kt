@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
+import pt.isec.marco.quizec.ui.screens.BackgroundWithImage
 import pt.isec.marco.quizec.ui.screens.criador.MeteImagem
 import pt.isec.marco.quizec.ui.screens.criador.TipoPerguntaCard
 import pt.isec.marco.quizec.ui.viewmodels.FirebaseViewModel
@@ -82,129 +83,133 @@ fun ResponderQuestionarioScreen(
         val pagerState = rememberPagerState(pageCount = {
             perguntas.size + 2
         })
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
+        BackgroundWithImage(
+            modifier = Modifier.fillMaxSize()
         ) {
-            Log.d("ResponderQuestionarioScreen", "idPartilha: $partilha")
-            if (true) {
-                if (
-                    false
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                Log.d("ResponderQuestionarioScreen", "idPartilha: $partilha")
+                if (true) {
+                    if (
+                        false
 //                    partilha!!.tempoEspera > 0
                     ) {
-                    mostraTempoEspera(partilha!!)
-                } else {
-                    Log.d("PagerState", "Current page: ${pagerState.currentPage}")
-                    HorizontalPager(
-                        state = pagerState,
-                        modifier = Modifier.fillMaxSize()
-                    ) { page ->
-                        if (page == 0) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(4.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .padding(2.dp)
-                            ) {
-                                val picture =
-                                    remember { mutableStateOf(questionario?.imagem) }
-                                Card(
+                        mostraTempoEspera(partilha!!)
+                    } else {
+                        Log.d("PagerState", "Current page: ${pagerState.currentPage}")
+                        HorizontalPager(
+                            state = pagerState,
+                            modifier = Modifier.fillMaxSize()
+                        ) { page ->
+                            if (page == 0) {
+                                Box(
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(8.dp)
-                                        .padding(bottom = 16.dp)
-                                        .verticalScroll(rememberScrollState()),
-                                    elevation = CardDefaults.cardElevation(4.dp),
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = Color(255, 224, 192)
-                                    )
+                                        .fillMaxSize()
+                                        .padding(4.dp)
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .padding(2.dp)
                                 ) {
-                                    Column(
-                                        verticalArrangement = Arrangement.Center
-                                    ) {
-                                        questionario?.let { Text(it.id) }
-                                        MeteImagem(picture)
-                                        questionario?.let { Text(it.descricao) }
-                                    }
-                                }
-                            }
-
-                        } else if (page == pagerState.pageCount - 1) {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(4.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .padding(2.dp)
-                            ) {
-                                val message by remember { mutableStateOf("") }
-
-                                Button(
-                                    onClick = {
-                                        FStorageUtil.addRespostasToPartilha(
-                                            partilha!!.id,
-                                            respostas,
-                                            FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                                    val picture =
+                                        remember { mutableStateOf(questionario?.imagem) }
+                                    Card(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(8.dp)
+                                            .padding(bottom = 16.dp)
+                                            .verticalScroll(rememberScrollState()),
+                                        elevation = CardDefaults.cardElevation(4.dp),
+                                        colors = CardDefaults.cardColors(
+                                            containerColor = Color(255, 224, 192)
                                         )
+                                    ) {
+                                        Column(
+                                            verticalArrangement = Arrangement.Center
+                                        ) {
+                                            questionario?.let { Text(it.id) }
+                                            MeteImagem(picture)
+                                            questionario?.let { Text(it.descricao) }
+                                        }
                                     }
+                                }
+
+                            } else if (page == pagerState.pageCount - 1) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(4.dp)
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .padding(2.dp)
                                 ) {
-                                    Text("Finalizar")
+                                    val message by remember { mutableStateOf("") }
+
+                                    Button(
+                                        onClick = {
+                                            FStorageUtil.addRespostasToPartilha(
+                                                partilha!!.id,
+                                                respostas,
+                                                FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                                            )
+                                        }
+                                    ) {
+                                        Text("Finalizar")
+                                    }
+                                    if (message != "") {
+                                        Text(message)
+                                    }
                                 }
-                                if (message != "") {
-                                    Text(message)
+                            } else {
+                                val pergunta = perguntas[page - 1]
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(4.dp)
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .padding(2.dp)
+                                ) {
+                                    TipoPerguntaCard(
+                                        pergunta, true, respostas[page - 1]
+                                    )
                                 }
-                            }
-                        } else {
-                            val pergunta = perguntas[page - 1]
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(4.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .padding(2.dp)
-                            ) {
-                                TipoPerguntaCard(
-                                    pergunta, true, respostas[page - 1]
-                                )
                             }
                         }
                     }
                 }
-            }
-            Row(
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .wrapContentHeight()
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                horizontalArrangement = Arrangement.Center
-            ) {
-                repeat(pagerState.pageCount) { i ->
-                    var isAnswered = false
-                    if (i != 0 && i != pagerState.pageCount - 1) {
-                        if (respostas[i - 1].isNotEmpty()) {
-                            for (j in respostas[i - 1].indices) {
-                                if (respostas[i - 1][j] != "") {
-                                    isAnswered = true
+                Row(
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .wrapContentHeight()
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    repeat(pagerState.pageCount) { i ->
+                        var isAnswered = false
+                        if (i != 0 && i != pagerState.pageCount - 1) {
+                            if (respostas[i - 1].isNotEmpty()) {
+                                for (j in respostas[i - 1].indices) {
+                                    if (respostas[i - 1][j] != "") {
+                                        isAnswered = true
+                                    }
                                 }
                             }
-                        }
 
+                        }
+                        val color = when {
+                            isAnswered -> Color.Green
+                            !isAnswered && pagerState.currentPage == i -> Color.DarkGray
+                            i == 0 || i == pagerState.pageCount - 1 -> Color.White
+                            else -> Color.Red
+                        }
+                        Box(
+                            modifier = Modifier
+                                .padding(2.dp)
+                                .clip(CircleShape)
+                                .background(color)
+                                .size(16.dp)
+                        )
                     }
-                    val color = when {
-                        isAnswered -> Color.Green
-                        !isAnswered && pagerState.currentPage == i -> Color.DarkGray
-                        i == 0 || i == pagerState.pageCount - 1 -> Color.White
-                        else -> Color.Red
-                    }
-                    Box(
-                        modifier = Modifier
-                            .padding(2.dp)
-                            .clip(CircleShape)
-                            .background(color)
-                            .size(16.dp)
-                    )
                 }
             }
         }

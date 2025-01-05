@@ -1,5 +1,6 @@
 package pt.isec.marco.quizec.ui.screens.criador
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -13,14 +14,18 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import pt.isec.marco.quizec.ui.viewmodels.FirebaseViewModel
 import pt.isec.marco.quizec.ui.viewmodels.Partilha
 
@@ -29,6 +34,7 @@ import pt.isec.marco.quizec.ui.viewmodels.Partilha
 fun PartilharQuestionarioScreen(
     viewModel: FirebaseViewModel,
     idQuestionario: String,
+    navController: NavHostController
 ) {
     var partilha by remember { mutableStateOf<Partilha?>(null) }
     var tempoEspera by remember { mutableStateOf(0L) }
@@ -91,9 +97,24 @@ fun PartilharQuestionarioScreen(
                                 usersList = emptyList()
                             )
                         )
+                        navController.navigate("menu-criador") {
+                            popUpTo("menu-criador") {
+                                inclusive = true
+                            }
+                        }
                     }
+
                 ) {
                     Text("Começar Partilha")
+                }
+            }
+            val partilhaSuccess by viewModel.partilhaSuccess.collectAsState()
+            val context = LocalContext.current
+
+            LaunchedEffect(partilhaSuccess) {
+                if (partilhaSuccess) {
+                    Toast.makeText(context, "Partilha iniciada com sucesso!", Toast.LENGTH_SHORT).show()
+                    viewModel.resetSuccessState()
                 }
             }
         }

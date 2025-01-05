@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -89,24 +88,24 @@ fun CriarQuestionarioScreen(
                 Spacer(Modifier.height(32.dp))
                 AdicionaImagens(picture, context, imagePath)
                 Spacer(Modifier.height(16.dp))
-                TextField(
-                    value = descricao,
-                    onValueChange = { newText ->
-                        descricao = newText
-                    },
-                    label = { Text("Descrição:") },
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.LightGray,
-                        unfocusedContainerColor = Color.LightGray,
-                        focusedIndicatorColor = Color.Blue,
-                        unfocusedIndicatorColor = Color.Gray,
-                        cursorColor = Color.Blue
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-
-                )
-                Spacer(Modifier.height(16.dp))
+//                TextField(
+//                    value = descricao,
+//                    onValueChange = { newText ->
+//                        descricao = newText
+//                    },
+//                    label = { Text("Descrição:") },
+//                    colors = TextFieldDefaults.colors(
+//                        focusedContainerColor = Color.LightGray,
+//                        unfocusedContainerColor = Color.LightGray,
+//                        focusedIndicatorColor = Color.Blue,
+//                        unfocusedIndicatorColor = Color.Gray,
+//                        cursorColor = Color.Blue
+//                    ),
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//
+//                )
+//                Spacer(Modifier.height(16.dp))
                 Button(
                     onClick = {
                         navController.navigate("tipo-pergunta") {
@@ -174,6 +173,10 @@ fun CriarQuestionarioScreen(
 
             GuardaQuestionario(
                 onConfirm = {
+                    if (nomeQuestionario.isBlank()) {
+                        error = "Introduza descrição"
+                        return@GuardaQuestionario
+                    }
                     confirmaDialog = false
                     if (picture.value != null) {
                         val fileUri: Uri = Uri.fromFile(picture.value?.let { File(it) })
@@ -249,8 +252,8 @@ fun GuardaQuestionario(
     Dialog(onDismissRequest = onDismiss) {
         Box(
             modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .background(Color.White)
+                .fillMaxWidth(0.9f)
+                .background(Color.LightGray)
                 .padding(16.dp)
         ) {
             Column(
@@ -264,23 +267,38 @@ fun GuardaQuestionario(
                 )
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = "De um nome ao seu questionário:",
+                    text = "Introduza uma descrição do questionario: ",
                     fontSize = 16.sp,
                     color = Color.Gray
                 )
-                TextField(
+                androidx.compose.material3.OutlinedTextField(
                     value = nomeQuestionario,
+                    isError =nomeQuestionario.isBlank()  ,
                     onValueChange = { onNomeChange(it) },
-                    placeholder = { Text("Escreve aqui...") }
+                    placeholder = { Text("Escreve aqui...") },
+
+                    modifier = Modifier.fillMaxWidth()
                 )
+//                TextField(
+//                    value = nomeQuestionario,
+//                    onValueChange = { onNomeChange(it) },
+//                    placeholder = { Text("Escreve aqui...") }
+//                )
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
                 ) {
-                    Button(onClick = onDismiss) {
+                    Button(
+                        onClick = onDismiss,
+                        modifier = Modifier.weight(1f)
+                    ) {
                         Text("Cancelar")
                     }
-                    Button(onClick = onConfirm) {
+                    Button(
+                        onClick = onConfirm,
+                        modifier = Modifier.weight(1f)
+                    ) {
                         Text("Terminar")
                     }
                 }

@@ -341,7 +341,8 @@ fun MainScreen(
                     ) {
                         PartilharQuestionarioScreen(
                             viewModel = viewModel,
-                            idQuestionario = idQuestionario
+                            idQuestionario = idQuestionario,
+                            navController = navController
                         )
                     }
                 }

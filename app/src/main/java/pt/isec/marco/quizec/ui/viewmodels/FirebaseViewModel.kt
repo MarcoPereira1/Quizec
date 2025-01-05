@@ -7,6 +7,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import pt.isec.marco.quizec.utils.FAuthUtil
 import pt.isec.marco.quizec.utils.FStorageUtil
@@ -72,15 +74,24 @@ open class FirebaseViewModel : ViewModel() {
             }, questionario, this@FirebaseViewModel)
         }
     }
+    private val _partilhaSuccess = MutableStateFlow(false)
+    val partilhaSuccess: StateFlow<Boolean> = _partilhaSuccess
 
+    private val _error2 = MutableStateFlow<String?>(null)
+    val error2: StateFlow<String?> = _error2
     fun addPartilhaToFirestore(partilha: Partilha) {
         viewModelScope.launch {
             FStorageUtil.addPartilhaToFirestore({ exception ->
                 _error.value = exception?.message
+                _partilhaSuccess.value = false
             }, partilha, this@FirebaseViewModel)
+
+            _partilhaSuccess.value = true
         }
     }
-
+    fun resetSuccessState() {
+        _partilhaSuccess.value = false
+    }
     fun addRespostasToPartilha(idPartilha: String, respostaList: List<List<String>>){
         viewModelScope.launch {
             FStorageUtil.addRespostasToPartilha(idPartilha, respostaList,FirebaseAuth.getInstance().currentUser?.uid ?: "" )
