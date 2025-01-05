@@ -160,10 +160,10 @@ class FStorageUtil {
             stopObserver()
             val db = Firebase.firestore
             listenerRegistration = db.collection("Questionarios")
-                .whereEqualTo("idUtilizador", userId) // Filtra pelo ID do utilizador logado
+                .whereEqualTo("idUtilizador", userId)
                 .addSnapshotListener { querySnapshot, e ->
                     if (e != null) {
-                        onNewValues(null, e) // Passa o erro para o callback
+                        onNewValues(null, e)
                         return@addSnapshotListener
                     }
 
@@ -172,9 +172,9 @@ class FStorageUtil {
                             Questionario.fromFirestore(doc)
                         }
                         Log.i("Firestore", "$questionarios")
-                        onNewValues(questionarios, null) // Passa a lista filtrada para o callback
+                        onNewValues(questionarios, null)
                     } else {
-                        onNewValues(emptyList(), null) // Retorna uma lista vazia se não houver documentos
+                        onNewValues(emptyList(), null)
                     }
                 }
         }
