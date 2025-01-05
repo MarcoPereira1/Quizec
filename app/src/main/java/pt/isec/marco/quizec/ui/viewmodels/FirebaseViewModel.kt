@@ -80,22 +80,13 @@ open class FirebaseViewModel : ViewModel() {
             }, partilha, this@FirebaseViewModel)
         }
     }
-    fun updateDataInFirestore() {
+
+    fun addRespostasToPartilha(idPartilha: String, respostaList: List<List<String>>){
         viewModelScope.launch {
-            //FirebaseUtils.updateDataInFirestore()
-            FStorageUtil.updateDataInFirestoreTrans { exception ->
-                _error.value = exception?.message
-            }
+            FStorageUtil.addRespostasToPartilha(idPartilha, respostaList,FirebaseAuth.getInstance().currentUser?.uid ?: "" )
         }
     }
 
-    fun removeDataFromFirestore() {
-        viewModelScope.launch {
-            FStorageUtil.removeDataFromFirestore { exception ->
-                _error.value = exception?.message
-            }
-        }
-    }
 
     private val _questionariosAux = mutableStateOf<List<Questionario>>(emptyList())
     val questionariosAux: State<List<Questionario>> get() = _questionariosAux

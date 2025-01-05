@@ -48,10 +48,8 @@ fun VerQuestionarioScreen(
         perguntasIds.forEach { perguntaId ->
             FStorageUtil.getPerguntaById(perguntaId) { pergunta, _ ->
                 if (pergunta != null) {
-
                     perguntas = perguntas + pergunta
                 }
-
             }
         }
     }

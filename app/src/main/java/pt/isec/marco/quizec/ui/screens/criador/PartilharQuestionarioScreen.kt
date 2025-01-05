@@ -51,7 +51,7 @@ fun PartilharQuestionarioScreen(
 
             OutlinedTextField(
                 value = tempoEspera.toString(),
-                isError = tempoEspera <= 0,
+                isError = tempoEspera < 0,
                 label = { Text("Tempo de Espera (em segundos):") },
                 onValueChange = { newText ->
                     tempoEspera = newText.toLongOrNull() ?: 0L
@@ -86,7 +86,9 @@ fun PartilharQuestionarioScreen(
                                 id = "",
                                 idQuestionario = idQuestionario,
                                 tempoEspera = tempoEspera,
-                                duracao = duracao
+                                duracao = duracao,
+                                respostaList = emptyList(),
+                                usersList = emptyList()
                             )
                         )
                     }

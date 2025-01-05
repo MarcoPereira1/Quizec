@@ -22,9 +22,11 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,6 +40,7 @@ import pt.isec.marco.quizec.ui.viewmodels.FirebaseViewModel
 import pt.isec.marco.quizec.ui.viewmodels.Partilha
 import pt.isec.marco.quizec.ui.viewmodels.Questionario
 import pt.isec.marco.quizec.ui.viewmodels.Pergunta
+import pt.isec.marco.quizec.utils.FStorageUtil
 
 @SuppressLint("UnrememberedMutableState")
 @Composable
@@ -47,7 +50,7 @@ fun ResponderQuestionarioScreen(
 
 ) {
     val partilha = Partilha(
-        "nome", "1223", 0, 1000
+        "rdrTgU", "Ir7ewu", 0, 1000, emptyList(), emptyList()
     )
 
     val perguntasList = listOf(
@@ -147,7 +150,7 @@ fun ResponderQuestionarioScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-    ){
+    ) {
         if (partilha != null) {
             if (partilha.tempoEspera > 0) {
                 mostraTempoEspera(partilha)
@@ -156,7 +159,7 @@ fun ResponderQuestionarioScreen(
                     state = pagerState,
                     modifier = Modifier.fillMaxSize()
                 ) { page ->
-                    if(page == 0){
+                    if (page == 0) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -173,12 +176,12 @@ fun ResponderQuestionarioScreen(
                                     .verticalScroll(rememberScrollState()),
                                 elevation = CardDefaults.cardElevation(4.dp),
                                 colors = CardDefaults.cardColors(
-                                    containerColor = Color(255,224,192)
+                                    containerColor = Color(255, 224, 192)
                                 )
                             ) {
                                 Column(
                                     verticalArrangement = Arrangement.Center
-                                ){
+                                ) {
                                     Text(questionario.id)
                                     MeteImagem(picture)
                                     Text(questionario.descricao)
@@ -186,7 +189,7 @@ fun ResponderQuestionarioScreen(
                             }
                         }
 
-                    }else if(page == perguntasList.size + 2){
+                    } else if (page == pagerState.pageCount - 1) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -194,22 +197,20 @@ fun ResponderQuestionarioScreen(
                                 .clip(RoundedCornerShape(16.dp))
                                 .padding(2.dp)
                         ) {
+                            val message by remember { mutableStateOf("") }
                             Button(
                                 onClick = {
-                                    for(i in respostas.indices){
-                                        if(respostas[i].isEmpty()){
-                                            // guarda o nr da pergunta
-                                        }
-                                    }
-                                    // mostra um texto de confirmcao a dizer que se realmente quer
-                                    // acabar o teste e se sim acaba o teste
+                                    FStorageUtil.addRespostasToPartilha(partilha.id, respostas,FirebaseAuth.getInstance().currentUser?.uid ?: "")
                                 }
-                            ){
+                            ) {
                                 Text("Finalizar")
                             }
+                            if(message != ""){
+                                Text(message)
+                            }
                         }
-                    } else{
-                        val pergunta = perguntasList[page-1]
+                    } else {
+                        val pergunta = perguntasList[page - 1]
                         Box(
                             modifier = Modifier
                                 .fillMaxSize()
@@ -218,7 +219,7 @@ fun ResponderQuestionarioScreen(
                                 .padding(2.dp)
                         ) {
                             TipoPerguntaCard(
-                                pergunta, true, respostas[page-1]
+                                pergunta, true, respostas[page - 1]
                             )
                         }
                     }
@@ -235,19 +236,22 @@ fun ResponderQuestionarioScreen(
         ) {
             repeat(pagerState.pageCount) { i ->
                 var isAnswered = false
-                if(i != 0 && i != pagerState.pageCount-1){
-                    if(respostas[i-1].isNotEmpty()){
-                        isAnswered = true
+                if (i != 0 && i != pagerState.pageCount - 1) {
+                    if (respostas[i - 1].isNotEmpty()) {
+                        for (j in respostas[i - 1].indices) {
+                            if (respostas[i - 1][j] != "") {
+                                isAnswered = true
+                            }
+                        }
                     }
-                }
 
+                }
                 val color = when {
                     isAnswered -> Color.Green
                     !isAnswered && pagerState.currentPage == i -> Color.DarkGray
-                    i == 0 || i == pagerState.pageCount-1 -> Color.DarkGray
+                    i == 0 || i == pagerState.pageCount - 1 -> Color.White
                     else -> Color.Red
                 }
-
                 Box(
                     modifier = Modifier
                         .padding(2.dp)
@@ -258,8 +262,6 @@ fun ResponderQuestionarioScreen(
             }
         }
     }
-
-
 }
 
 @Composable
